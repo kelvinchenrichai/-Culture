@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { ShareCardData, ShareCardStyle } from '../types';
 import { TODAY_INFO } from '../data/mockData';
+import type { TodayViewModel } from '../src/viewmodels/types';
 import {
   X,
   Share2,
@@ -19,6 +20,7 @@ interface ShareCardModalProps {
   onClose: () => void;
   initialData?: Partial<ShareCardData>;
   isElderMode: boolean;
+  today: TodayViewModel;
 }
 
 export const ShareCardModal: React.FC<ShareCardModalProps> = ({
@@ -26,6 +28,7 @@ export const ShareCardModal: React.FC<ShareCardModalProps> = ({
   onClose,
   initialData,
   isElderMode,
+  today,
 }) => {
   if (!isOpen) return null;
 
@@ -37,14 +40,14 @@ export const ShareCardModal: React.FC<ShareCardModalProps> = ({
   const [customBlessing, setCustomBlessing] = useState('祝你今天事事順心，平安喜樂！');
 
   const handleCopyText = () => {
-    const text = `【今日好日 · 民俗生活指南】\n📅 國曆 ${TODAY_INFO.solarDate} (${TODAY_INFO.weekday}) · 農曆 ${TODAY_INFO.lunarDate}\n✨ 今日氣場：${TODAY_INFO.overallVerdict} (${TODAY_INFO.score}分)\n🌸 宜：${TODAY_INFO.suitableActivities.map((a) => a.name).join('、')}\n⚠️ 忌：${TODAY_INFO.unsuitableActivities.map((a) => a.name).join('、')}\n💌 今日一句：${TODAY_INFO.emotionalQuote.content}\n${customBlessing}\n\n👉 每天都看得懂的農民曆生活指南`;
+    const text = today.state === 'success' ? `【今日好日 · 民俗生活指南】\n📅 國曆 ${today.date.solarDisplay} (${today.date.weekday}) · 農曆 ${today.date.lunarDisplay}\n🌸 宜：${today.goodActions.map(a => a.label).join('、') || '無明確記載'}\n⚠️ 忌：${today.badActions.map(a => a.label).join('、') || '無明確記載'}\n${customBlessing}\n\n資料依據：${today.source.primarySource}` : '今日資料暫時無法取得，請稍後再試。';
     navigator.clipboard?.writeText?.(text);
     setCopiedToast(true);
     setTimeout(() => setCopiedToast(false), 2500);
   };
 
   const handleShareLine = () => {
-    const text = `【今日好日】${TODAY_INFO.solarDate} · 農曆${TODAY_INFO.lunarDate}\n今日一句：${TODAY_INFO.emotionalQuote.content}\n${customBlessing}`;
+    const text = `【今日好日】${today.date.solarDisplay} · 農曆${today.date.lunarDisplay}\n${customBlessing}`;
     const url = `https://line.me/R/msg/text/?${encodeURIComponent(text)}`;
     window.open(url, '_blank');
   };
@@ -144,14 +147,14 @@ export const ShareCardModal: React.FC<ShareCardModalProps> = ({
               <div className="flex items-center justify-between border-b border-current/15 pb-3">
                 <div>
                   <div className="text-xs opacity-70">
-                    {TODAY_INFO.solarDate} · {TODAY_INFO.weekday}
+                    {today.date.solarDisplay} · {today.date.weekday}
                   </div>
                   <div className="font-serif-tc font-bold text-lg text-[#A63A28]">
-                    農曆 {TODAY_INFO.lunarDate}
+                    農曆 {today.date.lunarDisplay}
                   </div>
                 </div>
                 <div className="seal-stamp-filled text-xs px-2.5 py-1">
-                  {TODAY_INFO.overallVerdict} · 92分
+                  今日參考
                 </div>
               </div>
 
@@ -161,7 +164,7 @@ export const ShareCardModal: React.FC<ShareCardModalProps> = ({
                     宜
                   </span>
                   <span className="text-xs font-semibold leading-relaxed">
-                    {TODAY_INFO.suitableActivities.map((a) => a.name).join(' · ')}
+                    {today.goodActions.map((a) => a.label).join(' · ') || '無明確記載'}
                   </span>
                 </div>
 
@@ -170,7 +173,7 @@ export const ShareCardModal: React.FC<ShareCardModalProps> = ({
                     忌
                   </span>
                   <span className="text-xs opacity-80 leading-relaxed">
-                    {TODAY_INFO.unsuitableActivities.map((a) => a.name).join(' · ')}
+                    {today.badActions.map((a) => a.label).join(' · ') || '無明確記載'}
                   </span>
                 </div>
               </div>
@@ -189,11 +192,11 @@ export const ShareCardModal: React.FC<ShareCardModalProps> = ({
               </div>
 
               <div className="font-serif-tc text-2xl font-bold">
-                {TODAY_INFO.solarDate}
+                {today.date.solarDisplay}
               </div>
 
               <div className="text-xs opacity-70">
-                農曆 {TODAY_INFO.lunarDate} · {TODAY_INFO.solarTerm}
+                農曆 {today.date.lunarDisplay}
               </div>
 
               <div className="p-4 rounded-xl bg-current/5 border border-current/10 my-2">
@@ -256,7 +259,7 @@ export const ShareCardModal: React.FC<ShareCardModalProps> = ({
               </div>
 
               <div className="pt-2 border-t border-dashed border-current/25 flex items-center justify-between text-[11px] opacity-75">
-                <span>{TODAY_INFO.solarDate}</span>
+                <span>{today.date.solarDisplay}</span>
                 <span>今日好日生活指南</span>
               </div>
             </div>

@@ -1,6 +1,3 @@
-import { describe, expect, it } from 'vitest';
-import { LunarDataProvider } from '../src/lib/calendar/lunarDataProvider';
-describe('LunarData provider', () => {
-  it('normalizes a bundled date', () => expect(new LunarDataProvider().getDay('2026-08-29')).toMatchObject({ date: '2026-08-29', weekday: '星期六', sources: [expect.stringContaining('LunarData')] }));
-  it('returns null outside bundled months', () => expect(new LunarDataProvider().getDay('2026-03-01')).toBeNull());
-});
+import { describe, expect, it } from 'vitest'; import { LunarDataProvider, type LunarDataMonth } from '../src/lib/calendar/lunarDataProvider';
+const month: LunarDataMonth = { year: 2026, month: 8, days: [{ gregorian: '2026-08-29', weekDay: '星期六', lunar: { yearGanzhi: '丙午', monthName: '七月小', dayName: '十七' }, auspicious: ['祭祀'], inauspicious: ['嫁娶'], deityBirthday: [] }] };
+describe('LunarData provider', () => { const provider = new LunarDataProvider(async (year, requestedMonth) => year === 2026 && requestedMonth === 8 ? month : null); it('normalizes a fetched date', async () => expect(await provider.getDay('2026-08-29')).toMatchObject({ date: '2026-08-29', weekday: '星期六', primarySource: 'LunarData' })); it('returns null outside available months', async () => expect(await provider.getDay('2026-03-01')).toBeNull()); });

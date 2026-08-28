@@ -9,6 +9,10 @@ export type CalendarDay = {
   luckyHours?: string[];
   deityBirthdays: string[];
   sources: string[];
+  primarySource: string;
+  verificationSources: string[];
+  hasConflict: boolean;
+  verification?: CalendarDay[];
 };
 
 export interface CalendarProvider {

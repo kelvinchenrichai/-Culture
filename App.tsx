@@ -15,12 +15,20 @@ import { FindDaysView } from './components/FindDaysView';
 import { TemplesView } from './components/TemplesView';
 import { ShareCardModal } from './components/ShareCardModal';
 import { ShareCardData } from './types';
+import { TodayRealSections } from './components/TodayRealSections';
+import { RealDecisionView } from './components/RealDecisionView';
+import { RealDeitiesView } from './components/RealDeitiesView';
+import { RealTemplesView } from './components/RealTemplesView';
+import { RealDeityDetail } from './components/RealDeityDetail';
+import { useTodayViewModel } from './src/hooks/useTodayViewModel';
 import { Sparkles, Calendar, Heart, ShieldAlert, ArrowRight } from 'lucide-react';
 
 export default function App() {
+  const today = useTodayViewModel();
   const [activeTab, setActiveTab] = useState<NavTab>('today');
   const [isElderMode, setIsElderMode] = useState<boolean>(false);
   const [selectedDecisionId, setSelectedDecisionId] = useState<string>('haircut');
+  const [decisionQuery, setDecisionQuery] = useState<string | undefined>();
   const [selectedDeityId, setSelectedDeityId] = useState<string | null>(null);
   const [selectedGuideId, setSelectedGuideId] = useState<string>('basic-flow');
   const [findDaysCategory, setFindDaysCategory] = useState<string>('剪頭髮');
@@ -32,6 +40,7 @@ export default function App() {
 
   // Navigation Helpers
   const handleOpenDecision = (decisionId: string) => {
+    setDecisionQuery(undefined);
     // Map common action names to decision IDs if needed
     let mappedId = decisionId;
     if (decisionId.includes('理髮') || decisionId.includes('剪髮') || decisionId.includes('剪頭髮')) {
@@ -53,6 +62,13 @@ export default function App() {
     }
 
     setSelectedDecisionId(mappedId);
+    setActiveTab('decision');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleRuleQuery = (query: string) => {
+    setDecisionQuery(query);
+    setSelectedDecisionId('haircut');
     setActiveTab('decision');
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
@@ -126,12 +142,7 @@ export default function App() {
         {activeTab === 'today' && (
           <div className="space-y-4 pb-12 animate-in fade-in duration-200">
             {/* 1. Today Summary Hero Card */}
-            <TodaySummaryCard
-              dayInfo={TODAY_INFO}
-              isElderMode={isElderMode}
-              onOpenShareModal={() => handleOpenShareModal()}
-              onOpenDecision={handleOpenDecision}
-            />
+            <TodayRealSections today={today} isElderMode={isElderMode} onQuery={handleRuleQuery} onDecision={handleOpenDecision} onDeities={() => { setSelectedDeityId(null); setActiveTab('deity'); }} />
 
             {/* 2. Big Touch Quick Entries (Section 6 requirement) */}
             <QuickEntryGrid
@@ -144,24 +155,8 @@ export default function App() {
               isElderMode={isElderMode}
             />
 
-            {/* 3. Suitable & Unsuitable Activities (宜 / 忌) */}
-            <ActionCard
-              suitableActivities={TODAY_INFO.suitableActivities}
-              unsuitableActivities={TODAY_INFO.unsuitableActivities}
-              isElderMode={isElderMode}
-              onSelectAction={handleOpenDecision}
-            />
-
-            {/* 4. Today Worship & Deity Context */}
-            <DeityCard
-              dayInfo={TODAY_INFO}
-              isElderMode={isElderMode}
-              onOpenDeityDetail={handleOpenDeityDetail}
-              onOpenGuide={handleOpenGuide}
-            />
-
-            {/* 5. Daily Emotion & Warm Life Quote */}
-            <EmotionCard
+            {/* Editorial layer remains visually separate from calendar facts. */}
+            <div className="relative"><EmotionCard
               quote={TODAY_INFO.emotionalQuote}
               isElderMode={isElderMode}
               onOpenShareModal={() =>
@@ -172,7 +167,7 @@ export default function App() {
                   style: 'daily-quote'
                 })
               }
-            />
+            />{import.meta.env.DEV && <span className="absolute right-4 top-4 text-[10px] px-2 py-1 rounded-full bg-[#FFF8E8] text-[#7A5A13] font-bold">EDITORIAL SAMPLE</span>}</div>
 
             {/* Footer Culture note */}
             <footer className="text-center py-6 text-xs text-[#736B63] space-y-1">
@@ -188,32 +183,16 @@ export default function App() {
 
         {/* VIEW 2: 生活決策速查頁 (「今天可以剪頭髮嗎？」等) */}
         {activeTab === 'decision' && (
-          <DecisionView
-            selectedDecisionId={selectedDecisionId}
-            isElderMode={isElderMode}
-            onBackToHome={handleGoHome}
-            onOpenFindDays={handleOpenFindDays}
-            onOpenShareModal={handleOpenShareModal}
-          />
+          <RealDecisionView selectedId={selectedDecisionId} initialQuery={decisionQuery} today={today.calendarDay} onBack={handleGoHome} />
         )}
 
         {/* VIEW 3: 今天拜什麼 & 神明百科 / 詳情頁 */}
         {activeTab === 'deity' && (
           <div>
             {selectedDeityId ? (
-              <DeityDetailView
-                deityId={selectedDeityId}
-                isElderMode={isElderMode}
-                onBack={() => setSelectedDeityId(null)}
-                onNavigateToTemples={handleNavigateToTemples}
-                onOpenShareModal={handleOpenShareModal}
-              />
+              <RealDeityDetail deityId={selectedDeityId} onBack={() => setSelectedDeityId(null)} onTemples={handleNavigateToTemples} />
             ) : (
-              <DeitiesView
-                isElderMode={isElderMode}
-                onSelectDeity={(deityId) => setSelectedDeityId(deityId)}
-                onOpenGuide={handleOpenGuide}
-              />
+              <RealDeitiesView today={today} onSelect={(deityId) => setSelectedDeityId(deityId)} />
             )}
           </div>
         )}
@@ -239,11 +218,7 @@ export default function App() {
 
         {/* VIEW 6: 附近寺廟地圖頁 */}
         {activeTab === 'temples' && (
-          <TemplesView
-            initialSearchQuery={templeSearchQuery}
-            isElderMode={isElderMode}
-            onSelectTempleDeity={handleOpenDeityDetail}
-          />
+          <RealTemplesView isElderMode={isElderMode} />
         )}
       </main>
 
@@ -267,6 +242,7 @@ export default function App() {
         onClose={() => setIsShareModalOpen(false)}
         initialData={shareModalData}
         isElderMode={isElderMode}
+        today={today}
       />
     </div>
   );

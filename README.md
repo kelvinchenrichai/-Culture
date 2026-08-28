@@ -1,6 +1,6 @@
 # 今日好日 — 台灣民俗生活指南
 
-把台灣傳統民俗轉成一般人看得懂的生活指南。第一階段 POC 保留原有 React/Vite UI，新增離線日曆 adapter、規則引擎、神明/寺廟服務與分享卡，不串大型語言模型。
+把台灣傳統民俗轉成一般人看得懂的生活指南。Phase 2 已讓既有 React/Vite UI 的首頁、生活決策、今日神明、附近寺廟與分享卡使用真實 service flow，不串大型語言模型。
 
 ## Setup / Testing
 
@@ -17,7 +17,7 @@ pnpm validate:calendar
 
 ## Data Sources
 
-- LunarData（MIT）：內嵌 2026 年 1、2、6、8、12 月真實 JSON；資料範圍為 PARTIAL。
+- LunarData（MIT）：`public/data/calendar/2026/` 提供 2026 全年真實 JSON，瀏覽器按月份載入。
 - lunar-javascript（MIT）：農曆、節氣及宜忌交叉驗證。
 - cnlunar（MIT）：已研究，Python offline validation 尚未整合。
 - 全國宗教資訊系統資料－寺廟（政府資料開放授權條款第 1 版）：importer 已建立，全量匯入/地理編碼尚未完成。
@@ -30,14 +30,15 @@ pnpm validate:calendar
 
 | Capability | Status |
 | --- | --- |
-| Calendar lookup (bundled months) / normalization | DONE |
+| Calendar lookup (2026 full year, monthly static fetch) | DONE |
 | lunar-javascript comparison | DONE |
 | Intent/date parser / rule engine | DONE |
 | Deity service | DONE (sample data) |
 | Nearby temple calculation | DONE |
 | Government temple importer | PARTIAL |
 | SVG share card | DONE |
-| UI migration from mock to services | PARTIAL |
+| Home / decision / deity-today / temple / today-share integration | DONE |
+| Find-days / worship-guide / editorial quote migration | PARTIAL |
 | cnlunar comparison | PARTIAL |
 | AI fallback | NOT DONE (intentionally) |
 

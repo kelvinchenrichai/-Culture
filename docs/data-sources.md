@@ -2,7 +2,7 @@
 
 ## LunarData — REAL DATA, PARTIAL RANGE
 
-https://github.com/donma/LunarData（MIT）提供 1970–2100 按年月拆分的離線 JSON/JS，包含農曆、節氣、宜忌、沖煞、吉時及神明事件。POC 只 bundle 五個驗證月份，其他日期明確無資料。
+https://github.com/donma/LunarData（MIT）提供 1970–2100 按年月拆分的離線 JSON/JS。Phase 2 提供 2026 全年 12 個月份，置於 `public/` 並按月讀取；其他年份明確無資料。
 
 ## lunar-javascript — REAL CALCULATION LIBRARY
 
