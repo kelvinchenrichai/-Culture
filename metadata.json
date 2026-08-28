@@ -1,0 +1,6 @@
+{
+  "name": "今日好日 - 台灣民俗生活指南",
+  "description": "每天都看得懂的農民曆與拜拜助手。將傳統民俗變成現代、溫暖、長輩好用、年輕人也喜歡的生活決策指南。",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
