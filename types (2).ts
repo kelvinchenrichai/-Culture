@@ -1,1 +1,0 @@
-export type Deity = { id: string; name: string; aliases: string[]; categories: string[]; whatFor: string[]; offerings: string[]; intro?: string; worshipTips?: string[]; lunarBirthdays: string[]; source: string; dataStatus: 'verified' | 'sample' | 'placeholder' };

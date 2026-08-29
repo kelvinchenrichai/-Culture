@@ -11,8 +11,6 @@ pnpm test
 pnpm lint
 pnpm build
 pnpm validate:calendar
-pnpm run data:validate         # 跨資料集品質檢查（temple/deity；calendar 用上面那條）
-pnpm run data:update:temples   # 重跑全國寺廟 importer（見 docs/temple-data-pipeline.md）
 ```
 
 不需要 `GEMINI_API_KEY` 或其他 API key。
@@ -26,8 +24,7 @@ pnpm run data:update:temples   # 重跑全國寺廟 importer（見 docs/temple-d
 - 神明 seed：明確標為 `sample` / `placeholder`。
 - `data/mockData.ts`：UI MOCK CONTENT，不進入正式規則引擎。
 
-詳見 [資料來源](docs/data-sources.md)、[架構](docs/architecture.md)、[驗證報告](docs/validation-report.md)、
-[資料涵蓋範圍](docs/data-coverage.md)、[長輩 UX](docs/elder-ux.md)、[寺廟資料 pipeline](docs/temple-data-pipeline.md)。
+詳見 [資料來源](docs/data-sources.md)、[架構](docs/architecture.md)、[驗證報告](docs/validation-report.md)。
 
 ## POC Status
 
@@ -37,14 +34,12 @@ pnpm run data:update:temples   # 重跑全國寺廟 importer（見 docs/temple-d
 | lunar-javascript comparison | DONE |
 | Intent/date parser / rule engine | DONE |
 | Deity service | DONE (sample data) |
-| Nearby temple calculation | DONE，含 5→10→20→30km 自動擴大與距離格式化 |
-| Government temple importer | DONE（pipeline 完整，含 dedupe/normalize/alias/validate），資料本身仍是 5 筆 REAL SAMPLE — 見 [data-coverage.md](docs/data-coverage.md) |
-| Simple Mode（原「大字模式」，真正重排資訊層級） | DONE（首頁/決策結果/導覽），FindDaysView/WorshipGuideView/RealDeitiesView 尚未套用 |
+| Nearby temple calculation | DONE |
+| Government temple importer | PARTIAL |
 | SVG share card | DONE |
 | Home / decision / deity-today / temple / today-share integration | DONE |
 | Find-days / worship-guide / editorial quote migration | PARTIAL |
 | cnlunar comparison | PARTIAL |
-| Festival importer / deity field-level verification / temple GPS enrichment / find-suitable-days service | NOT DONE（P2，見 handoff 報告） |
 | AI fallback | NOT DONE (intentionally) |
 
 正式發佈前應保留各資料來源 attribution，並為神明內容補齊逐欄位可稽核來源。
