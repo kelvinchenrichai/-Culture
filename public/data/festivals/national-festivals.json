@@ -1,0 +1,39 @@
+[
+  {
+    "id": "festival-0",
+    "name": "2026大甲媽祖遶境進香",
+    "templeName": "大甲鎮瀾宮",
+    "category": "遶境進香",
+    "rawDateText": "2026年4月17日至2026年4月26日",
+    "parsedStartDate": "2026-04-17",
+    "parsedEndDate": "2026-04-26",
+    "city": "臺中市",
+    "district": "大甲區",
+    "address": "臺中市大甲區順天路158號",
+    "sources": [
+      {
+        "title": "遠見雜誌報導，引用大甲鎮瀾宮公告的起駕/回鑾日期：https://www.gvm.com.tw/article/128444"
+      }
+    ],
+    "dateStatus": "parsed"
+  },
+  {
+    "id": "festival-1",
+    "name": "2026保生文化祭",
+    "templeName": "大龍峒保安宮",
+    "normalizedTempleId": "T005",
+    "category": "文化祭典",
+    "rawDateText": "2026年4月19日至2026年6月16日",
+    "parsedStartDate": "2026-04-19",
+    "parsedEndDate": "2026-06-16",
+    "city": "臺北市",
+    "district": "大同區",
+    "address": "臺北市大同區哈密街61號",
+    "sources": [
+      {
+        "title": "臺北旅遊網（臺北市政府官方觀光網站）：https://www.travel.taipei/zh-tw/event-calendar/details/66369"
+      }
+    ],
+    "dateStatus": "parsed"
+  }
+]

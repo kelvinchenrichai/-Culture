@@ -3,6 +3,9 @@ import { WORSHIP_GUIDES } from '../data/mockData';
 import { WorshipGuide as PrototypeWorshipGuide } from '../types';
 import { BASIC_WORSHIP_GUIDE } from '../src/data/worship/basicWorshipGuide';
 import type { ProvenancedField } from '../src/lib/provenance/types';
+import { useFestivals } from '../src/hooks/useFestivals';
+import { getUpcomingFestivals } from '../src/lib/festivals/festivalService';
+import { taipeiToday } from '../src/services/appServices';
 import {
   BookOpen,
   ShoppingBag,
@@ -15,7 +18,40 @@ import {
   CheckCircle2,
   Clock,
   Info,
+  PartyPopper,
 } from 'lucide-react';
+
+/** Part E4：拜拜頁小範圍顯示最近的廟會與祭典。Simple Mode 最多 3 筆，一般模式不特別限制（目前資料量本來就小）。 */
+function UpcomingFestivalsSection({ limit }: { limit?: number }) {
+  const { festivals } = useFestivals();
+  const upcoming = getUpcomingFestivals({ from: taipeiToday(), days: 180 }, festivals);
+  const shown = typeof limit === 'number' ? upcoming.slice(0, limit) : upcoming;
+
+  return (
+    <div className="bg-[#FDF9F3] rounded-2xl p-4 border border-[#E8E1D5] shadow-sm">
+      <div className="flex items-center space-x-2 mb-3">
+        <PartyPopper className="w-4 h-4 text-[#A63A28]" />
+        <h3 className="text-sm font-bold text-[#2C2C2C]">最近的廟會與祭典</h3>
+      </div>
+      {shown.length > 0 ? (
+        <div className="space-y-2">
+          {shown.map((f) => (
+            <div key={f.id} className="p-3 rounded-xl bg-white border border-[#E8E1D5] text-sm">
+              <div className="font-bold text-[#2C2C2C]">{f.name}</div>
+              <div className="text-xs text-[#736B63] mt-0.5">
+                {f.parsedStartDate}
+                {f.parsedEndDate && f.parsedEndDate !== f.parsedStartDate ? ` ～ ${f.parsedEndDate}` : ''}
+                {f.city ? `・${f.city}${f.district ?? ''}` : ''}
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <p className="text-xs text-[#736B63]">目前這個地區近期沒有收錄中的廟會或祭典資料，還在陸續補充中。</p>
+      )}
+    </div>
+  );
+}
 
 interface WorshipGuideViewProps {
   selectedGuideId?: string;
@@ -108,6 +144,8 @@ function SimpleWorshipFlow({ isElderMode }: { isElderMode: boolean }) {
           </span>
         </div>
       </div>
+
+      <UpcomingFestivalsSection limit={3} />
     </div>
   );
 }
@@ -239,6 +277,8 @@ function NormalWorshipGuideBrowser({ isElderMode, selectedGuideId }: { isElderMo
           </div>
         </div>
       </div>
+
+      <UpcomingFestivalsSection />
     </div>
   );
 }

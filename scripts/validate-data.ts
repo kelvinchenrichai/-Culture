@@ -10,6 +10,7 @@ import { readFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
 import { DEITIES } from '../src/data/deities/deities';
 import type { Temple } from '../src/lib/temples/types';
+import type { ReligiousFestival } from '../src/lib/festivals/types';
 
 type Issue = { area: string; message: string };
 
@@ -43,6 +44,29 @@ async function validateTemples(): Promise<Issue[]> {
   return issues;
 }
 
+async function validateFestivals(): Promise<{ issues: Issue[]; found: boolean }> {
+  const issues: Issue[] = [];
+  const path = resolve('public/data/festivals/national-festivals.json');
+  let festivals: ReligiousFestival[];
+  try {
+    festivals = JSON.parse(await readFile(path, 'utf8'));
+  } catch {
+    return { issues: [], found: false }; // Part F 尚未全量匯入是合法狀態，不算失敗，NOT DONE 訊息另外印。
+  }
+
+  const seenIds = new Map<string, number>();
+  for (const f of festivals) {
+    if (!f.name?.trim()) issues.push({ area: 'festival', message: `id=${f.id} 活動名稱為空` });
+    if (f.dateStatus === 'parsed' && (!f.parsedStartDate || !f.parsedEndDate)) {
+      issues.push({ area: 'festival', message: `${f.name} 標記為 parsed 但 parsedStartDate/parsedEndDate 不完整` });
+    }
+    seenIds.set(f.id, (seenIds.get(f.id) ?? 0) + 1);
+  }
+  for (const [id, count] of seenIds) if (count > 1) issues.push({ area: 'festival', message: `id "${id}" 重複出現 ${count} 次` });
+
+  return { issues, found: true };
+}
+
 function validateDeities(): Issue[] {
   const issues: Issue[] = [];
   const seenIds = new Map<string, number>();
@@ -61,12 +85,19 @@ function validateDeities(): Issue[] {
 }
 
 async function main() {
-  const [templeIssues, deityIssues] = await Promise.all([validateTemples(), Promise.resolve(validateDeities())]);
-  const allIssues = [...templeIssues, ...deityIssues];
+  const [templeIssues, deityIssues, festivalResult] = await Promise.all([
+    validateTemples(),
+    Promise.resolve(validateDeities()),
+    validateFestivals(),
+  ]);
+  const allIssues = [...templeIssues, ...deityIssues, ...festivalResult.issues];
 
   console.log('[data:validate] 神明 (deities):', deityIssues.length === 0 ? 'PASS' : `${deityIssues.length} 個問題`);
   console.log('[data:validate] 寺廟 (temples):', templeIssues.length === 0 ? 'PASS' : `${templeIssues.length} 個問題`);
-  console.log('[data:validate] 節慶 (festivals): NOT DONE — festival importer 屬於本輪 P2，尚未建立，沒有資料可檢查。');
+  console.log(
+    '[data:validate] 節慶 (festivals):',
+    !festivalResult.found ? '尚未產生 public/data/festivals/national-festivals.json，先跑 `pnpm run data:update:festivals`。' : festivalResult.issues.length === 0 ? 'PASS' : `${festivalResult.issues.length} 個問題`,
+  );
   console.log('[data:validate] 農民曆 (calendar): 另外用 `pnpm run validate:calendar` 檢查兩個曆法來源是否一致，這裡不重複做。');
 
   if (allIssues.length > 0) {
