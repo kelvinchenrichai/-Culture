@@ -15,7 +15,8 @@
     "calendar:fetch": "tsx scripts/fetch-lunar-data.ts",
     "data:update:temples": "tsx scripts/import-national-temples.ts",
     "data:update:festivals": "tsx scripts/import-festivals.ts",
-    "data:validate": "tsx scripts/validate-data.ts"
+    "data:validate": "tsx scripts/validate-data.ts",
+    "data:coverage": "tsx scripts/compute-data-coverage.ts"
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.1.14",

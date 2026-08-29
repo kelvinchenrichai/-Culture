@@ -1,0 +1,99 @@
+{
+  "generatedAt": "2026-08-29",
+  "calendar": {
+    "yearsCovered": [
+      "2026"
+    ],
+    "monthsPresent": {
+      "2026": 12
+    },
+    "note": "只列出實際有 JSON 檔案的年份；其他年份 CalendarService 會誠實回傳 unavailable，不會 fallback 到假資料。"
+  },
+  "temples": {
+    "sampleSize": 5,
+    "withCoordinates": 5,
+    "coordinateCoverageOfSamplePct": 100,
+    "byCity": {
+      "臺北市": 5
+    },
+    "note": "REAL SAMPLE（pipeline 驗證用），不是全國覆蓋率。全國寺廟總筆數（dataset 8203）目前未知，因為這個環境連不上 data.gov.tw，所以這裡不會用一個猜測的分母算「全國座標覆蓋率」。"
+  },
+  "festivals": {
+    "sampleSize": 2,
+    "parsedDates": 2,
+    "parsedCoveragePct": 100,
+    "note": "REAL SAMPLE，2 筆查證過的真實 2026 年活動，不是 dataset 8209 全量。"
+  },
+  "deityProfiles": {
+    "deityCount": 6,
+    "fieldsTrackedPerDeity": 8,
+    "perDeity": [
+      {
+        "id": "tudigong",
+        "verifiedFields": 4,
+        "totalFields": 8,
+        "pct": 50
+      },
+      {
+        "id": "mazu",
+        "verifiedFields": 1,
+        "totalFields": 8,
+        "pct": 12.5
+      },
+      {
+        "id": "guandi",
+        "verifiedFields": 0,
+        "totalFields": 8,
+        "pct": 0
+      },
+      {
+        "id": "guanyin",
+        "verifiedFields": 5,
+        "totalFields": 8,
+        "pct": 62.5
+      },
+      {
+        "id": "yuelao",
+        "verifiedFields": 5,
+        "totalFields": 8,
+        "pct": 62.5
+      },
+      {
+        "id": "caishen",
+        "verifiedFields": 7,
+        "totalFields": 8,
+        "pct": 87.5
+      }
+    ],
+    "overallVerifiedFieldPct": 45.8,
+    "note": "分母是「本站追蹤的欄位數（name/aliases/dates/beliefs/commonPrayers/offerings/worshipSteps/culturalBackground）」，不是「這位神明理論上有多少可查資訊」，所以這是一個誠實、有明確定義的完成度，但不代表「這位神明的資料已經完整」。"
+  },
+  "worshipGuide": {
+    "verifiedFields": 0,
+    "totalFields": 5,
+    "pct": 0,
+    "note": "目前只有 1 份 Simple Mode 預設流程（basic-worship），全部欄位皆為 sample／FOLKLORE，尚未有單一權威文獻可引用為 verified，見 docs/data-coverage.md。"
+  },
+  "needDeityMap": {
+    "totalNeeds": 8,
+    "needsWithDeity": 5,
+    "pct": 62.5,
+    "gaps": [
+      "academic",
+      "childbirth",
+      "justice"
+    ],
+    "note": "分母是本站定義的 8 個生活需求分類，不是「民間信仰理論上有多少需求分類」。gaps 是目前神明資料庫裡沒有對應神明的分類，對應 30–50 位神明擴充清單。"
+  },
+  "images": {
+    "total": 0,
+    "byCategory": {
+      "deity": 0,
+      "temple": 0,
+      "festival": 0,
+      "offering": 0,
+      "action": 0
+    },
+    "note": "尚未匯入任何圖片（見 docs/image-assets.md 的稽核結果與 src/data/images/imageRegistry.ts 的說明），這是誠實的 0，不是還沒統計。"
+  }
+}
