@@ -82,7 +82,7 @@ async function main() {
     calendar,
     temples: {
       ...templeCoverage,
-      note: 'REAL SAMPLE（pipeline 驗證用），不是全國覆蓋率。全國寺廟總筆數（dataset 8203）目前未知，因為這個環境連不上 data.gov.tw，所以這裡不會用一個猜測的分母算「全國座標覆蓋率」。',
+      note: '這是 dataset 8203（全國宗教資訊系統資料－寺廟）2026-08-29 由使用者親自從 data.gov.tw 下載的官方原始檔案全量匯入結果，不再是 REAL SAMPLE。座標覆蓋率是「這個政府資料集本身有記錄座標的比例」，不是「有寺廟但政府完全沒登記」的比例——後者無法從這份資料估計。',
     },
     festivals: {
       ...festivalCoverage,
