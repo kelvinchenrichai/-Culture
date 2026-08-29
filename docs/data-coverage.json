@@ -10,13 +10,34 @@
     "note": "只列出實際有 JSON 檔案的年份；其他年份 CalendarService 會誠實回傳 unavailable，不會 fallback 到假資料。"
   },
   "temples": {
-    "sampleSize": 5,
-    "withCoordinates": 5,
-    "coordinateCoverageOfSamplePct": 100,
+    "sampleSize": 12423,
+    "withCoordinates": 11916,
+    "coordinateCoverageOfSamplePct": 95.9,
     "byCity": {
-      "臺北市": 5
+      "臺南市": 1670,
+      "臺中市": 994,
+      "宜蘭縣": 659,
+      "花蓮縣": 194,
+      "新竹市": 164,
+      "高雄市": 1505,
+      "彰化縣": 884,
+      "雲林縣": 816,
+      "屏東縣": 1146,
+      "南投縣": 491,
+      "苗栗縣": 382,
+      "基隆市": 230,
+      "臺北市": 280,
+      "臺東縣": 218,
+      "嘉義縣": 715,
+      "嘉義市": 149,
+      "桃園市": 317,
+      "新北市": 945,
+      "新竹縣": 198,
+      "連江縣": 67,
+      "澎湖縣": 192,
+      "金門縣": 207
     },
-    "note": "REAL SAMPLE（pipeline 驗證用），不是全國覆蓋率。全國寺廟總筆數（dataset 8203）目前未知，因為這個環境連不上 data.gov.tw，所以這裡不會用一個猜測的分母算「全國座標覆蓋率」。"
+    "note": "這是 dataset 8203（全國宗教資訊系統資料－寺廟）2026-08-29 由使用者親自從 data.gov.tw 下載的官方原始檔案全量匯入結果，不再是 REAL SAMPLE。座標覆蓋率是「這個政府資料集本身有記錄座標的比例」，不是「有寺廟但政府完全沒登記」的比例——後者無法從這份資料估計。"
   },
   "festivals": {
     "sampleSize": 2,
