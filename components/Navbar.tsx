@@ -53,11 +53,12 @@ export const Navbar: React.FC<NavbarProps> = ({
                 ? 'bg-[#2C2C2C] text-white border-[#2C2C2C] shadow-sm'
                 : 'bg-white text-[#5C554E] border-[#E8E1D5] hover:bg-[#FDF9F3]'
             }`}
-            title="切換大字模式（長輩友善）"
+            title="切換簡易模式（長輩友善：大字、少選項、進階資料收起）"
+            aria-pressed={isElderMode}
             id="btn-toggle-elder-mode"
           >
             <Type className="w-3.5 h-3.5" />
-            <span>{isElderMode ? '大字模式 (開啟)' : '字體放大'}</span>
+            <span>{isElderMode ? '簡易模式 (開啟)' : '切換簡易模式'}</span>
           </button>
 
           {/* Quick Share Card Button */}
