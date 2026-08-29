@@ -3,7 +3,8 @@
 這份文件記錄「現在實際有多少資料」，不是「規劃要有多少資料」。每次跑
 `pnpm run data:update:temples` 或補齊 deity/festival 資料後，應該回來更新這份文件。
 
-最後更新：2026-08-29（Phase 4 施工，feature/elder-data-expansion 分支）。
+最後更新：2026-08-29（Phase 4 P2 施工，feature/folklore-data-content 分支，接續
+feature/elder-data-expansion 的 P0 成果）。
 
 ## Calendar
 
@@ -45,23 +46,59 @@ validate → dedupe → 輸出）已經完成並有測試覆蓋，換一個能�
 
 ## Festival（慶祭典）
 
-尚未建立 `scripts/import-festivals.ts`（Part F，P2，本輪未動工）。Raw / Normalized / Parsed dates /
-Unparsed dates 目前皆為 0。
+`scripts/import-festivals.ts` 已建立（Part E），架構跟寺廟 importer 對稱。
+
+| 指標 | 數值 |
+| --- | --- |
+| Raw 筆數（本輪來源：REAL SAMPLE，非 dataset 8209 下載） | 2 |
+| Normalized | 2 |
+| Parsed dates | 2 |
+| Partial dates | 0 |
+| Unparsed dates | 0 |
+
+2 筆都是查證過的真實 2026 年活動（2026大甲媽祖遶境進香、2026保生文化祭），詳見
+[data-sources.md](./data-sources.md)。Dataset 8209 本身這個環境連不上，全量匯入待補。
+`getUpcomingFestivals` 已經過測試，且刻意排除 `unparsed` 記錄——不會把日期不確定的活動當成
+「快到了」顯示。
 
 ## Deity（神明）
+
+`data/deities/deities.ts` 的 dataStatus 沒有變（Phase 2 seed，today 頁等既有 UI 用這個）：
 
 | dataStatus | 筆數 | id |
 | --- | --- | --- |
 | sample | 5 | tudigong, mazu, guandi, guanyin, yuelao |
 | placeholder | 1 | caishen |
-| verified（逐欄位可稽核來源） | 0 | — |
 
-Part G（欄位級 verification、FACT/FOLKLORE/EDITORIAL 分級）本輪未動工，仍是 P2。所有神明內容目前
-都標記 `sample` 或 `placeholder`，UI 與文案都不應把它們當成已核實的事實呈現。
+Part F 這輪新增的是疊加在上面的欄位級 provenance（`src/data/deities/deityProfiles.ts`），
+6 位優先神明都有 `DeityProfile`，逐欄位標記 verified/sample，沒有任何一位是全欄位 verified。
+詳見 [deity-verification.md](./deity-verification.md)，完整查證過程與逐位現況都在那份文件裡，
+這裡不重複。
+
+## Find Days（找好日子）
+
+`src/lib/rules/findSuitableDates.ts` 已建立（Part G），取代原本 `FindDaysView` 完全基於
+`data/mockData.ts` 的 `AUSPICIOUS_DAYS`（含假的「吉度 92 分」）。現在對 6 個已 normalize 的
+action（HAIRCUT/MOVE_HOME/WORSHIP/START_WORK/MARRIAGE/TRAVEL）即時查詢真正的 LunarData
+Primary 宜忌，用 2026 全年的真實資料驗證過（例如 MOVE_HOME 在 2026 年 1 月確實誠實回傳 0 筆
+「宜」的日期，不是隨便造一個假結果）。
+
+## Worship Guide（拜拜教學）
+
+`src/data/worship/basicWorshipGuide.ts` 已建立（Part H），Simple Mode 的預設拜拜流程現在有
+`ProvenancedField` 逐欄位 provenance（都是 `sample`／`FOLKLORE`，因為查不到單一權威文獻，
+誠實標記，不是查證不夠努力——見該檔案的註解）。Normal Mode 的多主題文章瀏覽器
+（`data/mockData.ts` 的 `WORSHIP_GUIDES`）維持既有內容，還沒有逐條轉換成新結構，屬於 PARTIAL。
 
 ## 已知限制
 
-- 全國寺廟資料目前只有 5 筆 REAL SAMPLE，涵蓋率 = 0%（相對於 dataset 8203 的全量），這是本輪最大
-  的已知落差。
-- 沒有任何新北市在地座標 enrichment（Part D）、慶祭典（Part F）、神明逐欄位驗證（Part G）、找好日子
-  服務（Part H）、拜拜教學結構化資料（Part I）——這些都還是 P2，本輪刻意沒有為了衝數量而動工。
+- 全國寺廟資料目前只有 5 筆 REAL SAMPLE，涵蓋率 = 0%（相對於 dataset 8203 的全量）。Pipeline
+  架構完成，本地檔案匯入模式（`--input`）已驗證可用，缺的是真正連得上 data.gov.tw 的環境或
+  手動下載的匯出檔。
+- 新北市座標 enrichment（Part D）：架構與 confidence 分級比對邏輯已完成並測試，但沒有實際跑過
+  真的新北市資料（同樣被網路白名單擋掉）。
+- 媽祖、關聖帝君的欄位級 provenance（Part F）：religion.moi.gov.tw 連不上，這兩位維持 sample。
+- Normal Mode 的多主題拜拜教學文章（Part H）：還沒有逐條轉換成 `ProvenancedField` 結構，只加了
+  頁面層級的誠實提示。
+- FindDaysView/WorshipGuideView 以外的畫面（RealDeitiesView、RealDeityDetail）：Simple Mode 深度
+  重排（Part A 遺留項目）本輪沒有再往下做，優先度排在 P2 內容工作之後。
