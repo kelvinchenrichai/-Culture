@@ -20,36 +20,70 @@
 
 ## Temple（全國寺廟）
 
+**2026-08-29 全量匯入完成。** 使用者親自從 data.gov.tw 的 dataset 8203（全國宗教資訊系統資料－
+寺廟）頁面下載官方原始 XML 檔案（`XML` 按鈕其實是跳轉到 API 端點顯示原始 XML，不是真的觸發下載，
+用 Ctrl+S 另存才能拿到檔案——這個下載流程本身的眉角記在 [data-sources.md](./data-sources.md)），
+用 importer 既有的 `--input` 本地檔案模式匯入，**不是**這個雲端環境自己連線下載的（data.gov.tw
+依然被這個環境的網路白名單擋著，這點沒有變）。
+
 | 指標 | 數值 |
 | --- | --- |
-| Raw 筆數（本輪來源：REAL SAMPLE fixture） | 5 |
-| Parsed（格式正確可解析） | 5 |
-| Normalized（地址/名稱正規化完成） | 5 |
-| Duplicates removed | 0（樣本裡沒有重複） |
-| With coordinates | 5（`coordinateStatus: government`） |
-| Without coordinates | 0 |
+| Raw 筆數（dataset 8203 官方原始檔） | 12,423 |
+| 格式錯誤跳過 | 0 |
+| Duplicates removed | 0（正規化廟名+地址後沒有重複） |
+| With coordinates（`coordinateStatus: government`） | 11,916（95.9%） |
+| Without coordinates | 507（進入 `data/temples/missing-coordinates.json`，見下方 GPS enrichment） |
 
-**這不是全國涵蓋率，是 pipeline 驗證用的 5 筆真實樣本。** 全量下載被這個雲端環境的網路政策擋下（見
-[data-sources.md](./data-sources.md) 的 BLOCKED 記錄），pipeline 本身（download → parse → normalize →
-validate → dedupe → 輸出）已經完成並有測試覆蓋，換一個能連線的環境重跑
-`pnpm run data:update:temples` 即可取得全量資料。
+這是目前的完整全國資料，不是樣本——`docs/data-coverage.json` 的 `temples.sampleSize` 欄位名稱雖然
+還叫 sample，但這輪之後代表的是「全量匯入後的真實筆數」。
 
-### 座標涵蓋率（依縣市）
+### 匯入過程中順便修的兩個問題
+
+1. **importer 沒有 XML parser**：之前只驗證過 JSON/CSV 格式，這是第一次真的拿到官方 XML 匯出檔。
+   新增 `parseXml`（極簡 flat-XML parser，只處理「同層重複節點、無巢狀、無屬性」這種常見的
+   政府資料集匯出形狀，見 `scripts/import-national-temples.ts` 的註解），不引入完整 XML/DOM 套件。
+2. **欄位對應跟原本猜的不一樣**：dataset 8203 實測欄位是 `行政區`（其實是縣市層級，例如
+   「臺南市」，不是鄉鎮市區）、`WGS84X`/`WGS84Y`（經度/緯度，不是「經度」「緯度」）、`編號`
+   （每筆都有的政府流水號，比只有約 1/4 記錄才有的「統一編號」更適合當 id）。之前只有 5 筆手key
+   的樣本 fixture，猜測的欄位名稱剛好都猜錯了——`normalizeRecord` 現在同時支援兩種形狀（樣本
+   fixture 的「縣市+行政區分開兩欄」跟 dataset 8203 實測的「只有一個行政區欄位」），並新增
+   `extractDistrictFromAddress` 從地址字串切出鄉鎮市區。兩種形狀都有測試覆蓋
+   （`tests/importNationalTemples.test.ts`）。
+
+### 意外發現並修掉的 bundle 問題
+
+`src/data/temples/temples.ts` 原本用 `import generated from '.../national-temples.json'`
+把 runtime fetch 失敗時的離線保底資料，直接綁定成「pipeline 產出檔的完整內容」。這在資料只有
+5 筆的時候沒問題，但換成上萬筆全量資料後，Vite 會把整份 8MB+ 的 JSON 直接內嵌進 JS bundle
+（不是一般的靜態資源 fetch，是變成程式碼本身的一部分）——已經改成手動維護一個很小的「知名寺廟」
+離線保底子集（5 筆，原本 pipeline 驗證用的 REAL SAMPLE），`pnpm run build` 後確認 JS bundle
+大小維持原本的 ~308KB，沒有因為全量資料而膨脹。`tests/templeOfflineFallback.test.ts` 有一條
+迴歸測試守住這件事（斷言離線保底陣列長度 < 50）。
+
+`public/data/temples/national-temples.json` 本身現在是 8.47MB（gzip 後約 905KB），純粹當
+runtime fetch 的靜態資源，不會進 JS bundle。這個檔案大小之後如果變成行動網路上的實際痛點
+（例如量到真的很慢的載入時間），下一步可以考慮按縣市拆檔、分頁載入，這輪先不做——目前
+gzip 後的大小還在合理範圍，沒有先跑去優化一個還沒被證實是問題的東西。
+
+### 座標涵蓋率（六都，依使用者原本的排序：新北→臺北→桃園→臺中→臺南→高雄）
 
 | 縣市 | 總數 | 有座標 | 無座標 |
 | --- | --- | --- | --- |
-| 臺北市 | 5 | 5 | 0 |
-| 新北市 | 0 | 0 | 0 |
-| 桃園市 | 0 | 0 | 0 |
-| 臺中市 | 0 | 0 | 0 |
-| 臺南市 | 0 | 0 | 0 |
-| 高雄市 | 0 | 0 | 0 |
-| 其他縣市 | 0 | 0 | 0 |
+| 新北市 | 945 | 940 | 5 |
+| 臺北市 | 280 | 279 | 1 |
+| 桃園市 | 317 | 292 | 25 |
+| 臺中市 | 994 | 980 | 14 |
+| 臺南市 | 1,670 | 1,644 | 26 |
+| 高雄市 | 1,505 | 1,456 | 49 |
+| 其他縣市（16 個） | 6,712 | 6,325 | 387 |
 
-全部 5 筆都在臺北市——這正是 Part E 要解決的「附近寺廟在臺北以外必定 0 筆結果」問題的根本原因。
-`findNearbyTemplesWithExpansion` 的 5→10→20→30km 自動擴大與明確告知（已完成，見
-[elder-ux.md](./elder-ux.md)）只能緩解「介面看起來像壞掉」，無法補上「其實沒有資料」——
-這需要 Part C 的全量匯入才能真正解決。
+六都本身的座標覆蓋率已經是 96–99%，不需要另外跑 Part D 的地方政府座標 enrichment 就有高覆蓋率——
+`src/lib/temples/coordinateEnrichment.ts` 那套 confidence 分級比對架構仍然保留，留給
+`data/temples/missing-coordinates.json` 這 507 筆真正缺座標的記錄用（金門縣缺最多，78 筆），
+不是全面重跑的必要條件。
+
+**「附近寺廟在臺北以外必定 0 筆結果」的問題到這裡才算真正解決**——上一輪的 P0 只做到
+「找不到資料時誠實擴大搜尋半徑並告知使用者」，這輪是真的把資料補上了。
 
 ## Festival（慶祭典）
 
@@ -124,11 +158,13 @@ Primary 宜忌，用 2026 全年的真實資料驗證過（例如 MOVE_HOME 在 
 
 ## 已知限制
 
-- 全國寺廟資料目前只有 5 筆 REAL SAMPLE，涵蓋率 = 0%（相對於 dataset 8203 的全量）。Pipeline
-  架構完成，本地檔案匯入模式（`--input`）已驗證可用，缺的是真正連得上 data.gov.tw 的環境或
-  手動下載的匯出檔。
-- 新北市座標 enrichment（Part D）：架構與 confidence 分級比對邏輯已完成並測試，但沒有實際跑過
-  真的新北市資料（同樣被網路白名單擋掉）。
+- ~~全國寺廟資料目前只有 5 筆 REAL SAMPLE~~ 已解決（2026-08-29）：使用者手動下載 dataset 8203
+  官方原始檔，全量匯入 12,423 筆，見上方「Temple（全國寺廟）」一節。
+- 507 筆寺廟（金門縣最多，78 筆）在 dataset 8203 本身就沒有座標，`data/temples/
+  missing-coordinates.json` 已列出，等後續要補的話可以用地方政府 open data 或
+  `coordinateEnrichment.ts` 的比對邏輯，但六都本身覆蓋率已經有 96–99%，優先度不高。
+- 新北市座標 enrichment（Part D）：既有的 confidence 分級比對架構仍然保留，但已經不是六都覆蓋率
+  的關鍵路徑——dataset 8203 本身就帶了新北市 940/945 筆的座標。
 - 媽祖、關聖帝君的欄位級 provenance（Part F）：religion.moi.gov.tw 連不上，這兩位維持 sample。
 - Normal Mode 的多主題拜拜教學文章（Part H）：還沒有逐條轉換成 `ProvenancedField` 結構，只加了
   頁面層級的誠實提示。

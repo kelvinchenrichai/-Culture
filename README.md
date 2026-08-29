@@ -24,7 +24,8 @@ pnpm run data:coverage            # 重新計算真實資料完成度，寫進 d
 - LunarData（MIT）：`public/data/calendar/2026/` 提供 2026 全年真實 JSON，瀏覽器按月份載入。
 - lunar-javascript（MIT）：農曆、節氣及宜忌交叉驗證。
 - cnlunar（MIT）：已研究，Python offline validation 尚未整合。
-- 全國宗教資訊系統資料－寺廟／慶(祭)典（政府資料開放授權條款第 1 版）：importer 已建立，全量匯入待有連線的環境重跑；寺廟 5 筆、慶祭典 2 筆皆為 REAL SAMPLE。
+- 全國宗教資訊系統資料－寺廟（政府資料開放授權條款第 1 版）：**已全量匯入 12,423 筆**（2026-08-29，使用者手動下載官方 XML 匯出檔），95.9% 有政府自帶座標，見 [data-coverage.md](docs/data-coverage.md)。
+- 全國宗教資訊系統資料－慶(祭)典（政府資料開放授權條款第 1 版）：importer 已建立，全量匯入待有連線的環境重跑或手動下載；目前 2 筆 REAL SAMPLE。
 - 文化部 國家文化記憶庫：4 位神明（土地公/觀音/月老/財神）的欄位級 provenance 來源，見 [deity-verification.md](docs/deity-verification.md)。
 - 神明 seed：明確標為 `sample` / `placeholder`，逐欄位 provenance 見上。
 - `data/mockData.ts`：UI MOCK CONTENT，`WORSHIP_GUIDES`（Normal Mode 拜拜教學文章）仍在使用，其餘（含找好日子的假分數資料）已停用不再進正式規則引擎。
@@ -42,8 +43,8 @@ pnpm run data:coverage            # 重新計算真實資料完成度，寫進 d
 | lunar-javascript comparison | DONE |
 | Intent/date parser / rule engine | DONE |
 | Deity service | DONE (sample data)，6 位優先神明另有欄位級 provenance（PARTIAL，見下） |
-| Nearby temple calculation | DONE，含 5→10→20→30km 自動擴大與距離格式化 |
-| Government temple importer | DONE（pipeline 完整，含 dedupe/normalize/alias/validate，含本地檔案匯入模式），資料本身仍是 5 筆 REAL SAMPLE — 見 [data-coverage.md](docs/data-coverage.md) |
+| Nearby temple calculation | DONE，含 5→10→20→30km 自動擴大與距離格式化；全量資料匯入後六都座標覆蓋率 96–99%，「臺北以外必定 0 筆」的問題已真正解決 |
+| Government temple importer | DONE（pipeline 完整，含 dedupe/normalize/alias/validate/XML 匯入），**全量 12,423 筆已匯入**（2026-08-29）— 見 [data-coverage.md](docs/data-coverage.md) |
 | Simple Mode（原「大字模式」，真正重排資訊層級） | DONE（首頁/決策結果/導覽/找好日子/拜拜教學），RealDeitiesView/RealDeityDetail 尚未套用 |
 | SVG share card | DONE |
 | Home / decision / deity-today / temple / today-share integration | DONE |

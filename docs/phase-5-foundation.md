@@ -80,9 +80,10 @@ pnpm run data:coverage
 
 ## 下一輪建議（不代表這輪會開始做）
 
-1. **使用者親自下載 Dataset 8203（全國寺廟）跟 Dataset 8209（慶祭典）的政府原始檔案**，
-   用 importer 既有的 `--input` 本地檔案模式匯入——這是目前解除「全台寺廟」「全量慶典」
-   兩項卡關最直接的路徑，不需要換 Claude 執行環境。
+1. ~~使用者親自下載 Dataset 8203（全國寺廟）跟 Dataset 8209（慶祭典）的政府原始檔案~~
+   **Dataset 8203 已完成（2026-08-29，`feature/national-temple-import` 分支）**：使用者下載
+   官方 XML 匯出檔，全量匯入 12,423 筆真實寺廟資料，95.9% 有座標，見
+   [data-coverage.md](./data-coverage.md)。Dataset 8209（慶祭典）同樣的路徑還沒做，維持原建議。
 2. 六都寺廟 GPS enrichment：拿到新北市（Dataset 122928 或手動下載）資料後，
    `scripts/enrich-temple-coordinates.ts` 直接可用，跑完一個縣市回報一次覆蓋率，
    再往下一個縣市推進。
