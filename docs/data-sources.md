@@ -67,3 +67,12 @@ https://github.com/OPN48/cnlunar（MIT）適合 offline validation / future gene
 | License | 政府網站公開內容，非開放資料授權條款，此處僅作事實引用與 attribution，不做大量轉載 |
 | Usage | `src/data/deities/deityProfiles.ts` 的 verified 欄位來源 |
 | Limitations | 沒有找到媽祖、關聖帝君的等價頁面；內政部「全國宗教資訊網」（religion.moi.gov.tw）本來就有這兩位的介紹頁（cid=241／cid=286），但這個環境連不上該網域（WebFetch 回報 ROBOTS_DISALLOWED/timeout），這兩位這輪維持 sample。 |
+
+## 媽祖紀念日期（Data Completion Foundation 新增）
+
+| 項目 | 內容 |
+| --- | --- |
+| 聖誕（農曆三月廿三） | [傳統藝術與民俗節慶－媽祖聖誕](https://www.tao.tycg.gov.tw/News_Content.aspx?n=6277&s=648464)，桃園市桃園區公所（.gov.tw） |
+| 飛昇紀念日（農曆九月初九） | [媽祖昇天祭](https://www.matsu-nsa.gov.tw/zh-TW/festivals/11)，交通部觀光署馬祖國家風景區管理處（.gov.tw） |
+| Usage | `src/data/deities/deityProfiles.ts` 的 `mazu.dates`，這是這輪唯一從 sample 升級為 verified 的媽祖欄位 |
+| Limitations | 兩個來源互相一致，沒有查到不同地區/廟宇採用不同日期的版本，因此 `DeityDateEvent.regionalVariation` 保持未設定；如果之後查到真的地區差異版本，再回來補這個旗標，不要提前假設有差異。 |

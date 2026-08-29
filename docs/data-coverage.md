@@ -3,8 +3,15 @@
 這份文件記錄「現在實際有多少資料」，不是「規劃要有多少資料」。每次跑
 `pnpm run data:update:temples` 或補齊 deity/festival 資料後，應該回來更新這份文件。
 
-最後更新：2026-08-29（Phase 4 P2 施工，feature/folklore-data-content 分支，接續
-feature/elder-data-expansion 的 P0 成果）。
+最後更新：2026-08-29（Data Completion Foundation 施工，feature/data-completion-foundation 分支，
+接續 feature/folklore-data-content 的 P2 成果）。
+
+**這份文件現在有一個機器可讀的對照版本**：`docs/data-coverage.json`，由
+`pnpm run data:coverage` 直接讀取 repo 裡的真實資料算出來（邏輯在
+`src/lib/coverage/computeCoverage.ts`，有 vitest 覆蓋）。這份 `.md` 手寫的敘述如果跟
+`.json` 對不上，以 `.json` 為準——先重跑 `pnpm run data:coverage`，再回頭修這份文件，
+不要反過來手動改數字。視覺化版本另外發布成一頁「資料完成度帳冊」（Artifact），
+每輪補資料後手動同步更新。
 
 ## Calendar
 
@@ -70,10 +77,35 @@ validate → dedupe → 輸出）已經完成並有測試覆蓋，換一個能�
 | sample | 5 | tudigong, mazu, guandi, guanyin, yuelao |
 | placeholder | 1 | caishen |
 
-Part F 這輪新增的是疊加在上面的欄位級 provenance（`src/data/deities/deityProfiles.ts`），
+Part F 新增的是疊加在上面的欄位級 provenance（`src/data/deities/deityProfiles.ts`），
 6 位優先神明都有 `DeityProfile`，逐欄位標記 verified/sample，沒有任何一位是全欄位 verified。
 詳見 [deity-verification.md](./deity-verification.md)，完整查證過程與逐位現況都在那份文件裡，
 這裡不重複。
+
+這一輪（Data Completion Foundation）額外把單一 `birthday` 欄位換成 `dates: DeityDateEvent[]`，
+支援一位神明有不只一個紀念日（聖誕／飛昇／得道），並用真實查證補上媽祖的「飛昇紀念日」
+（農曆九月初九，交通部觀光署馬祖國家風景區管理處）跟既有「聖誕」（農曆三月廿三，桃園市
+桃園區公所）——兩個 .gov.tw 來源互相一致、沒有查到地區差異版本，因此媽祖的 `dates` 欄位
+這輪從 sample 升級為 verified，是目前 6 位神明裡唯一因為這個模型升級而變 verified 的欄位
+（其餘欄位不受影響，媽祖依然不是全欄位 verified）。目前算出來的欄位級完成度（6 位 ×
+8 個追蹤欄位）：verified 45.8%，逐位數字見 `docs/data-coverage.json` 的 `deityProfiles.perDeity`。
+
+## 拜什麼對照表（Need→Deity Map）
+
+`src/data/needs/needDeityMap.ts`（Part：Data Completion Foundation）把「使用者實際會想的
+問題」（例如「最近工作不順拜什麼？」）對應到現有神明，而不是只能從神明百科查起。目前定義
+8 個需求分類，5 個已有對應神明（求財、事業、姻緣、家庭平安、健康），3 個是誠實保留的缺口
+（學業/考試、生育/小孩、司法/公平——分別對應文昌帝君/魁星、註生娘娘/臨水夫人、城隍爺，
+這幾位神明目前都還沒建檔）。所有描述文字都限定為客觀習俗陳述（「民間信仰中，求○○常見
+參拜○○」），不能寫成「拜 XX 就會成功」這種因果斷言，有測試守著banned phrase 檢查。
+
+## 圖片資產（Image Assets）
+
+`src/lib/images/imageAsset.ts` 定義了 schema（`deity`/`temple`/`festival`/`offering`/`action`
+五個分類，每筆記錄 source/license/attribution/originalUrl/downloadedAt/verified），
+`src/data/images/imageRegistry.ts` 目前刻意是空陣列——上一輪圖片授權 audit 的結論是「0 張
+來源不明圖片」，代表現有 UI 用的都是 icon/SVG，還沒有真的照片或插畫。這輪只建立 schema 跟
+`data:validate` 的驗證規則，沒有匯入任何圖片。
 
 ## Find Days（找好日子）
 
@@ -102,3 +134,6 @@ Primary 宜忌，用 2026 全年的真實資料驗證過（例如 MOVE_HOME 在 
   頁面層級的誠實提示。
 - FindDaysView/WorshipGuideView 以外的畫面（RealDeitiesView、RealDeityDetail）：Simple Mode 深度
   重排（Part A 遺留項目）本輪沒有再往下做，優先度排在 P2 內容工作之後。
+- 神明資料庫目前仍只有 6 位，拜什麼對照表因此有 3 個需求分類（學業/考試、生育/小孩、司法/公平）
+  查不到對應神明，見上方「拜什麼對照表」一節。
+- 圖片資產 registry 目前是空的，這輪只做了 schema，沒有匯入任何一張圖片。
