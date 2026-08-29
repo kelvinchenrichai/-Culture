@@ -103,7 +103,7 @@ export const QuickEntryGrid: React.FC<QuickEntryGridProps> = ({
             <button
               key={item.id}
               onClick={item.action}
-              className="w-full text-left p-4 rounded-xl bg-white border border-[#E8E1D5] hover:border-[#A63A28]/50 hover:bg-[#FDF6F4] transition-all group flex items-center justify-between focus:outline-none"
+              className="w-full text-left p-4 rounded-xl bg-white border border-[#E8E1D5] hover:border-[#A63A28]/50 hover:bg-[#FDF6F4] transition-all group flex items-center justify-between focus:outline-none focus-visible:ring-2 focus-visible:ring-[#A63A28]/50"
               id={`quick-action-${item.id}`}
             >
               <div className="flex items-center space-x-3">

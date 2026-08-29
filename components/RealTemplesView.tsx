@@ -53,6 +53,7 @@ export function RealTemplesView({ isElderMode }: { isElderMode: boolean }) {
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="搜尋廟名、主祀或地址"
+              aria-label="搜尋廟名、主祀或地址"
               className="w-full pl-9 pr-3 py-3 rounded-xl border border-[#E8E1D5] text-base"
             />
           </div>
@@ -140,6 +141,8 @@ function TempleCard({ temple, isElderMode }: { temple: NearbyTemple; isElderMode
         </a>
         <button
           onClick={() => setShowDetail((v) => !v)}
+          aria-expanded={showDetail}
+          aria-label={`${temple.name} 詳細資料`}
           className="px-4 py-3 rounded-xl bg-white border border-[#E8E1D5] text-[#5C554E] font-semibold min-h-[48px] flex items-center gap-1"
         >
           看詳細 <ChevronDown className={`w-4 h-4 transition-transform ${showDetail ? 'rotate-180' : ''}`} />

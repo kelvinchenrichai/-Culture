@@ -22,7 +22,8 @@ export const Navbar: React.FC<NavbarProps> = ({
         {/* Brand Logo & Name */}
         <button
           onClick={onGoHome}
-          className="flex items-center space-x-2.5 text-left group focus:outline-none"
+          aria-label="回到首頁"
+          className="flex items-center space-x-2.5 text-left group focus:outline-none focus-visible:ring-2 focus-visible:ring-[#A63A28]/50 rounded-xl"
           id="btn-brand-home"
         >
           <div className="w-10 h-10 rounded-2xl bg-[#A63A28] flex items-center justify-center text-white shadow-sm shadow-[#A63A28]/25 group-hover:scale-105 transition-transform">

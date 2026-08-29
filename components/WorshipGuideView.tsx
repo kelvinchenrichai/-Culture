@@ -181,6 +181,7 @@ function NormalWorshipGuideBrowser({ isElderMode, selectedGuideId }: { isElderMo
                 key={item.id}
                 onClick={() => setCurrentId(item.id)}
                 id={`btn-guide-tab-${item.id}`}
+                aria-pressed={isSelected}
                 className={`p-2.5 rounded-xl text-left transition-all border ${
                   isSelected ? 'bg-[#2C2C2C] text-white border-[#2C2C2C] shadow-sm' : 'bg-white text-[#5C554E] border-[#E8E1D5] hover:bg-[#FAF6F0]'
                 }`}
@@ -260,6 +261,7 @@ function NormalWorshipGuideBrowser({ isElderMode, selectedGuideId }: { isElderMo
                 <div key={idx} className="rounded-xl border border-[#E8E1D5] overflow-hidden bg-white">
                   <button
                     onClick={() => setOpenFaqIndex(isOpen ? null : idx)}
+                    aria-expanded={isOpen}
                     className="w-full p-3 text-left font-bold text-xs text-[#2C2C2C] flex items-center justify-between hover:text-[#A63A28]"
                   >
                     <span className="flex items-center">
