@@ -1,1 +1,7 @@
-*
+node_modules/
+dist/
+.pnpm-store/
+.env
+.env.local
+*.log
+pnpm-workspace.yaml
