@@ -26,7 +26,6 @@ export default function App() {
   const [decisionQuery, setDecisionQuery] = useState<string | undefined>();
   const [selectedDeityId, setSelectedDeityId] = useState<string | null>(null);
   const [selectedGuideId, setSelectedGuideId] = useState<string>('basic-flow');
-  const [findDaysCategory, setFindDaysCategory] = useState<string>('剪頭髮');
   const [templeSearchQuery, setTempleSearchQuery] = useState<string>('');
 
   // Share Card Modal State
@@ -77,12 +76,6 @@ export default function App() {
   const handleOpenGuide = (guideId?: string) => {
     if (guideId) setSelectedGuideId(guideId);
     setActiveTab('guide');
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
-
-  const handleOpenFindDays = (category: string) => {
-    setFindDaysCategory(category);
-    setActiveTab('find-days');
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
@@ -200,11 +193,7 @@ export default function App() {
 
         {/* VIEW 4: 找好日子頁 */}
         {activeTab === 'find-days' && (
-          <FindDaysView
-            initialCategory={findDaysCategory}
-            isElderMode={isElderMode}
-            onOpenShareModal={handleOpenShareModal}
-          />
+          <FindDaysView isElderMode={isElderMode} onOpenShareModal={handleOpenShareModal} />
         )}
 
         {/* VIEW 5: 拜拜實用教學頁 */}
