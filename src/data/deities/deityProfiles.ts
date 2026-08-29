@@ -14,11 +14,17 @@ import type { SourceReference } from '../../lib/provenance/types';
  *   `ROBOTS_DISALLOWED` / connect timeout，跟 data.gov.tw 被擋的狀況同一類）。所以媽祖、
  *   關聖帝君兩位這一輪仍然是 `sample`，不是查無資料，是環境連不到，誠實記錄在
  *   docs/deity-verification.md，換一個能連線的環境重跑就能補上。
- * - 農曆聖誕日期：除了財神（來源明確寫「正月初五」）之外，其餘幾位的聖誕日期在查到的頁面裡都沒有
+ * - 農曆紀念日期：除了財神（來源明確寫「正月初五」）之外，其餘幾位的聖誕日期在查到的頁面裡都沒有
  *   明確列出，所以維持 `sample`（沿用既有資料），不能因為「大家都這樣講」就升級成 verified。
  *
  * 不要因為想要更多 verified 欄位，就把這裡的 status 往上調——找不到夠格來源時，維持 sample
  * 才是對的（F4）。
+ *
+ * 這一輪（Data Completion Foundation）額外查證了媽祖的紀念日期：媽祖同時有「聖誕」（農曆三月廿三）
+ * 跟「飛昇紀念日」（農曆九月初九）兩個日期，分別由桃園市桃園區公所、交通部觀光署馬祖國家風景區
+ * 管理處兩個 .gov.tw 來源證實，兩者一致、沒有查到互相矛盾的地區差異版本，因此這是 `dates` 欄位
+ * 目前唯一從 sample 升級為 verified 的案例，`regionalVariation` 保持未設定（沒有查到真的地區差異，
+ * 不要因為模型支援這個欄位就隨便標 true）。
  */
 
 const TCMB_TUDIGONG: SourceReference = {
@@ -49,12 +55,33 @@ const TCMB_CAISHEN: SourceReference = {
   accessedAt: '2026-08-29',
 };
 
+const MATSU_NSA_ASCENSION: SourceReference = {
+  title: '媽祖昇天祭',
+  url: 'https://www.matsu-nsa.gov.tw/zh-TW/festivals/11',
+  publisher: '交通部觀光署馬祖國家風景區管理處',
+  accessedAt: '2026-08-29',
+  note: '「相傳農曆九月九日，是媽祖得道升天的日子」',
+};
+
+const TAOYUAN_MAZU_BIRTHDAY: SourceReference = {
+  title: '傳統藝術與民俗節慶－媽祖聖誕',
+  url: 'https://www.tao.tycg.gov.tw/News_Content.aspx?n=6277&s=648464',
+  publisher: '桃園市桃園區公所',
+  accessedAt: '2026-08-29',
+  note: '「農曆三月二十三日為媽祖慶賀誕辰」',
+};
+
 export const DEITY_PROFILES: DeityProfile[] = [
   {
     id: 'tudigong',
     name: { value: '福德正神', status: 'verified', contentType: 'FACT', sources: [TCMB_TUDIGONG] },
     aliases: { value: ['土地公', '土治公', '伯公', '后土', '社神'], status: 'verified', contentType: 'FACT', sources: [TCMB_TUDIGONG] },
-    birthday: { value: ['二月初二'], status: 'sample', contentType: 'FOLKLORE', sources: [] },
+    dates: {
+      value: [{ eventType: 'birthday', label: '聖誕', lunarDate: '二月初二' }],
+      status: 'sample',
+      contentType: 'FOLKLORE',
+      sources: [],
+    },
     beliefs: {
       value: ['地方與土地的守護神，守護聚落、農田、墓地、農田水渠、山等，職能廣泛且貼近日常生活'],
       status: 'verified',
@@ -76,7 +103,15 @@ export const DEITY_PROFILES: DeityProfile[] = [
     id: 'mazu',
     name: { value: '天上聖母', status: 'sample', contentType: 'FOLKLORE', sources: [] },
     aliases: { value: ['媽祖', '天后'], status: 'sample', contentType: 'FOLKLORE', sources: [] },
-    birthday: { value: ['三月廿三'], status: 'sample', contentType: 'FOLKLORE', sources: [] },
+    dates: {
+      value: [
+        { eventType: 'birthday', label: '聖誕', lunarDate: '三月廿三' },
+        { eventType: 'ascension', label: '飛昇紀念日', lunarDate: '九月初九' },
+      ],
+      status: 'verified',
+      contentType: 'FACT',
+      sources: [TAOYUAN_MAZU_BIRTHDAY, MATSU_NSA_ASCENSION],
+    },
     beliefs: { value: ['海上與出行平安的守護神，臺灣民間信仰中信眾最多的神祇之一'], status: 'sample', contentType: 'FOLKLORE', sources: [] },
     commonPrayers: { value: ['出行平安', '海上平安'], status: 'sample', contentType: 'FOLKLORE', sources: [] },
     offerings: { value: ['水果', '鮮花', '茶'], status: 'sample', contentType: 'FOLKLORE', sources: [] },
@@ -93,7 +128,12 @@ export const DEITY_PROFILES: DeityProfile[] = [
     id: 'guandi',
     name: { value: '關聖帝君', status: 'sample', contentType: 'FOLKLORE', sources: [] },
     aliases: { value: ['關公', '恩主公', '武聖'], status: 'sample', contentType: 'FOLKLORE', sources: [] },
-    birthday: { value: ['六月廿四'], status: 'sample', contentType: 'FOLKLORE', sources: [] },
+    dates: {
+      value: [{ eventType: 'birthday', label: '聖誕', lunarDate: '六月廿四' }],
+      status: 'sample',
+      contentType: 'FOLKLORE',
+      sources: [],
+    },
     beliefs: { value: ['忠義象徵，商業與正財的守護神'], status: 'sample', contentType: 'FOLKLORE', sources: [] },
     commonPrayers: { value: ['事業', '正財'], status: 'sample', contentType: 'FOLKLORE', sources: [] },
     offerings: { value: ['水果', '茶'], status: 'sample', contentType: 'FOLKLORE', sources: [] },
@@ -115,7 +155,16 @@ export const DEITY_PROFILES: DeityProfile[] = [
       contentType: 'FACT',
       sources: [TCMB_GUANYIN],
     },
-    birthday: { value: ['二月十九', '六月十九', '九月十九'], status: 'sample', contentType: 'FOLKLORE', sources: [] },
+    dates: {
+      value: [
+        { eventType: 'birthday', label: '聖誕', lunarDate: '二月十九' },
+        { eventType: 'enlightenment', label: '出家紀念日', lunarDate: '九月十九' },
+        { eventType: 'other', label: '成道紀念日', lunarDate: '六月十九' },
+      ],
+      status: 'sample',
+      contentType: 'FOLKLORE',
+      sources: [],
+    },
     beliefs: {
       value: ['大乘佛教西方極樂世界教主阿彌陀佛座下的上首菩薩，與大勢至菩薩並稱「西方三聖」，信眾一心稱念聖號可離苦得樂'],
       status: 'verified',
@@ -136,7 +185,12 @@ export const DEITY_PROFILES: DeityProfile[] = [
     id: 'yuelao',
     name: { value: '月下老人', status: 'verified', contentType: 'FACT', sources: [TCMB_YUELAO] },
     aliases: { value: ['月老', '月老公', '月老爺', '月老星君'], status: 'verified', contentType: 'FACT', sources: [TCMB_YUELAO] },
-    birthday: { value: ['八月十五'], status: 'sample', contentType: 'FOLKLORE', sources: [] },
+    dates: {
+      value: [{ eventType: 'birthday', label: '聖誕', lunarDate: '八月十五' }],
+      status: 'sample',
+      contentType: 'FOLKLORE',
+      sources: [],
+    },
     beliefs: { value: ['掌管男女姻緣之神，典出唐朝李復言《續幽怪錄・定婚店》的姻緣故事'], status: 'verified', contentType: 'FACT', sources: [TCMB_YUELAO] },
     commonPrayers: { value: ['求姻緣', '感情順利'], status: 'verified', contentType: 'FACT', sources: [TCMB_YUELAO] },
     offerings: { value: ['甜食', '水果'], status: 'sample', contentType: 'FOLKLORE', sources: [] },
@@ -152,7 +206,12 @@ export const DEITY_PROFILES: DeityProfile[] = [
     id: 'caishen',
     name: { value: '玄壇真君', status: 'verified', contentType: 'FACT', sources: [TCMB_CAISHEN] },
     aliases: { value: ['財神', '財神爺', '玄壇元帥', '趙公明', '趙元帥', '黑虎將軍', '武財神'], status: 'verified', contentType: 'FACT', sources: [TCMB_CAISHEN] },
-    birthday: { value: ['正月初五'], status: 'verified', contentType: 'FACT', sources: [TCMB_CAISHEN] },
+    dates: {
+      value: [{ eventType: 'birthday', label: '聖誕', lunarDate: '正月初五' }],
+      status: 'verified',
+      contentType: 'FACT',
+      sources: [TCMB_CAISHEN],
+    },
     beliefs: {
       value: ['道教神祇，居五路財神之首（中路武財神），與東路蕭升、南路陳九公、西路曹寶、北路姚少司並稱五路財神，代表各行各業'],
       status: 'verified',
