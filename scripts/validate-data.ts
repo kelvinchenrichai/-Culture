@@ -11,6 +11,9 @@ import { resolve } from 'node:path';
 import { DEITIES } from '../src/data/deities/deities';
 import type { Temple } from '../src/lib/temples/types';
 import type { ReligiousFestival } from '../src/lib/festivals/types';
+import { IMAGE_ASSETS } from '../src/data/images/imageRegistry';
+import { validateImageAsset } from '../src/lib/images/imageAsset';
+import { NEED_DEITY_MAP } from '../src/data/needs/needDeityMap';
 
 type Issue = { area: string; message: string };
 
@@ -84,13 +87,40 @@ function validateDeities(): Issue[] {
   return issues;
 }
 
+function validateImages(): Issue[] {
+  const issues: Issue[] = [];
+  const seenIds = new Map<string, number>();
+  for (const asset of IMAGE_ASSETS) {
+    for (const msg of validateImageAsset(asset)) issues.push({ area: 'image', message: msg });
+    seenIds.set(asset.id, (seenIds.get(asset.id) ?? 0) + 1);
+  }
+  for (const [id, count] of seenIds) if (count > 1) issues.push({ area: 'image', message: `id "${id}" 重複出現 ${count} 次` });
+  return issues;
+}
+
+function validateNeedDeityMap(): Issue[] {
+  const issues: Issue[] = [];
+  const validDeityIds = new Set(DEITIES.map((d) => d.id));
+  const seenNeedIds = new Map<string, number>();
+  for (const entry of NEED_DEITY_MAP) {
+    seenNeedIds.set(entry.needId, (seenNeedIds.get(entry.needId) ?? 0) + 1);
+    for (const id of entry.deityIds) {
+      if (!validDeityIds.has(id)) issues.push({ area: 'need-deity-map', message: `${entry.needId} 引用了不存在的神明 id "${id}"` });
+    }
+  }
+  for (const [id, count] of seenNeedIds) if (count > 1) issues.push({ area: 'need-deity-map', message: `needId "${id}" 重複出現 ${count} 次` });
+  return issues;
+}
+
 async function main() {
   const [templeIssues, deityIssues, festivalResult] = await Promise.all([
     validateTemples(),
     Promise.resolve(validateDeities()),
     validateFestivals(),
   ]);
-  const allIssues = [...templeIssues, ...deityIssues, ...festivalResult.issues];
+  const imageIssues = validateImages();
+  const needMapIssues = validateNeedDeityMap();
+  const allIssues = [...templeIssues, ...deityIssues, ...festivalResult.issues, ...imageIssues, ...needMapIssues];
 
   console.log('[data:validate] 神明 (deities):', deityIssues.length === 0 ? 'PASS' : `${deityIssues.length} 個問題`);
   console.log('[data:validate] 寺廟 (temples):', templeIssues.length === 0 ? 'PASS' : `${templeIssues.length} 個問題`);
@@ -98,6 +128,8 @@ async function main() {
     '[data:validate] 節慶 (festivals):',
     !festivalResult.found ? '尚未產生 public/data/festivals/national-festivals.json，先跑 `pnpm run data:update:festivals`。' : festivalResult.issues.length === 0 ? 'PASS' : `${festivalResult.issues.length} 個問題`,
   );
+  console.log('[data:validate] 圖片資產 (images):', IMAGE_ASSETS.length === 0 ? 'PASS（目前是空的，見 src/data/images/imageRegistry.ts）' : imageIssues.length === 0 ? 'PASS' : `${imageIssues.length} 個問題`);
+  console.log('[data:validate] 拜什麼對照表 (need-deity-map):', needMapIssues.length === 0 ? 'PASS' : `${needMapIssues.length} 個問題`);
   console.log('[data:validate] 農民曆 (calendar): 另外用 `pnpm run validate:calendar` 檢查兩個曆法來源是否一致，這裡不重複做。');
 
   if (allIssues.length > 0) {
