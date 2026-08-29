@@ -1,0 +1,111 @@
+[
+  {
+    "id": "T001",
+    "name": "艋舺龍山寺",
+    "aliases": [],
+    "rawMainDeity": "觀世音菩薩",
+    "normalizedDeityId": "guanyin",
+    "city": "臺北市",
+    "district": "萬華區",
+    "rawAddress": "臺北市萬華區廣州街211號",
+    "normalizedAddress": "臺北市萬華區廣州街211號",
+    "phone": "02-23025162",
+    "lat": 25.0372,
+    "lng": 121.4999,
+    "sources": [
+      {
+        "name": "全國宗教資訊系統資料－寺廟（政府資料開放授權條款第1版）",
+        "datasetId": "8203",
+        "updatedAt": "2026-08-29T15:25:22.647Z"
+      }
+    ],
+    "coordinateStatus": "government"
+  },
+  {
+    "id": "T002",
+    "name": "台北霞海城隍廟",
+    "aliases": [],
+    "rawMainDeity": "霞海城隍",
+    "city": "臺北市",
+    "district": "大同區",
+    "rawAddress": "臺北市大同區迪化街一段61號",
+    "normalizedAddress": "臺北市大同區迪化街一段61號",
+    "phone": "02-25580346",
+    "lat": 25.0555,
+    "lng": 121.5102,
+    "sources": [
+      {
+        "name": "全國宗教資訊系統資料－寺廟（政府資料開放授權條款第1版）",
+        "datasetId": "8203",
+        "updatedAt": "2026-08-29T15:25:22.647Z"
+      }
+    ],
+    "coordinateStatus": "government"
+  },
+  {
+    "id": "T003",
+    "name": "行天宮",
+    "aliases": [],
+    "rawMainDeity": "關聖帝君",
+    "normalizedDeityId": "guandi",
+    "city": "臺北市",
+    "district": "中山區",
+    "rawAddress": "臺北市中山區民權東路二段109號",
+    "normalizedAddress": "臺北市中山區民權東路二段109號",
+    "phone": "02-25027924",
+    "lat": 25.0627,
+    "lng": 121.5339,
+    "sources": [
+      {
+        "name": "全國宗教資訊系統資料－寺廟（政府資料開放授權條款第1版）",
+        "datasetId": "8203",
+        "updatedAt": "2026-08-29T15:25:22.647Z"
+      }
+    ],
+    "coordinateStatus": "government"
+  },
+  {
+    "id": "T004",
+    "name": "松山慈祐宮",
+    "aliases": [],
+    "rawMainDeity": "天上聖母",
+    "normalizedDeityId": "mazu",
+    "city": "臺北市",
+    "district": "松山區",
+    "rawAddress": "臺北市松山區八德路四段761號",
+    "normalizedAddress": "臺北市松山區八德路四段761號",
+    "phone": "02-27652798",
+    "lat": 25.0504,
+    "lng": 121.5778,
+    "sources": [
+      {
+        "name": "全國宗教資訊系統資料－寺廟（政府資料開放授權條款第1版）",
+        "datasetId": "8203",
+        "updatedAt": "2026-08-29T15:25:22.647Z"
+      }
+    ],
+    "coordinateStatus": "government"
+  },
+  {
+    "id": "T005",
+    "name": "大龍峒保安宮",
+    "aliases": [],
+    "rawMainDeity": "保生大帝",
+    "normalizedDeityId": "baosheng",
+    "city": "臺北市",
+    "district": "大同區",
+    "rawAddress": "臺北市大同區哈密街61號",
+    "normalizedAddress": "臺北市大同區哈密街61號",
+    "phone": "02-25951676",
+    "lat": 25.0731,
+    "lng": 121.5154,
+    "sources": [
+      {
+        "name": "全國宗教資訊系統資料－寺廟（政府資料開放授權條款第1版）",
+        "datasetId": "8203",
+        "updatedAt": "2026-08-29T15:25:22.647Z"
+      }
+    ],
+    "coordinateStatus": "government"
+  }
+]

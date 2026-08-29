@@ -1,8 +1,17 @@
 import type { Temple } from '../../lib/temples/types';
-export const TEMPLES: Temple[] = [
-  { id: 'lungshan', name: '艋舺龍山寺', mainDeity: '觀世音菩薩', city: '臺北市', district: '萬華區', address: '臺北市萬華區廣州街211號', latitude: 25.0372, longitude: 121.4999, source: 'REAL SAMPLE; public temple information, coordinates require importer verification' },
-  { id: 'xiahai', name: '台北霞海城隍廟', mainDeity: '霞海城隍', city: '臺北市', district: '大同區', address: '臺北市大同區迪化街一段61號', latitude: 25.0555, longitude: 121.5102, source: 'REAL SAMPLE; public temple information, coordinates require importer verification' },
-  { id: 'xingtian', name: '行天宮', mainDeity: '關聖帝君', city: '臺北市', district: '中山區', address: '臺北市中山區民權東路二段109號', latitude: 25.0627, longitude: 121.5339, source: 'REAL SAMPLE; public temple information, coordinates require importer verification' },
-  { id: 'cixing', name: '松山慈祐宮', mainDeity: '天上聖母', city: '臺北市', district: '松山區', address: '臺北市松山區八德路四段761號', latitude: 25.0504, longitude: 121.5778, source: 'REAL SAMPLE; public temple information, coordinates require importer verification' },
-  { id: 'baoan', name: '大龍峒保安宮', mainDeity: '保生大帝', city: '臺北市', district: '大同區', address: '臺北市大同區哈密街61號', latitude: 25.0731, longitude: 121.5154, source: 'REAL SAMPLE; public temple information, coordinates require importer verification' },
-];
+import generated from '../../../public/data/temples/national-temples.json';
+
+/**
+ * 這個陣列現在是 scripts/import-national-temples.ts 的產出（見該檔案與
+ * fixtures/temples/national-temples-raw-sample.json），不是手key的假資料。
+ *
+ * 目前只有 5 筆 REAL SAMPLE（全部在臺北市）—— 因為這個雲端開發環境的網路白名單
+ * 擋掉了 data.gov.tw（見 docs/data-sources.md 的 BLOCKED 記錄），還無法真的下載
+ * 全國寺廟資料。Pipeline 已經就緒，換一個能連線的環境重跑
+ * `pnpm run data:update:temples` 就能取得全量資料，不需要改任何程式碼。
+ *
+ * Runtime（RealTemplesView）改成直接 fetch `/data/temples/national-temples.json`，
+ * 這個 TS 陣列只作為 fetch 失敗時的內建 fallback，兩者共用同一份產出檔，不會有兩份
+ * 分歧的資料。
+ */
+export const TEMPLES: Temple[] = generated as Temple[];
