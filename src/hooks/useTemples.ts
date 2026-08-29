@@ -8,9 +8,10 @@ export type TemplesLoadState = 'loading' | 'success' | 'error';
  * Part C1：Runtime 只讀 import-national-temples.ts 產出的 static JSON，
  * 不會在瀏覽器裡直接打 data.gov.tw。
  *
- * fetch 失敗（離線、路徑錯誤等）時退回打包進 bundle 的 TEMPLES 常數，
- * 兩者其實是同一份產出檔（見 src/data/temples/temples.ts 的說明），
- * 純粹是「連不到伺服器」時的離線保底，不是另一份資料。
+ * fetch 失敗（離線、路徑錯誤等）時退回打包進 bundle 的 TEMPLES 常數——這是一個刻意維持
+ * 很小的「知名寺廟」子集，不是完整資料集（自從全量匯入後，完整資料集有上萬筆，不能整份塞進
+ * JS bundle，見 src/data/temples/temples.ts 的說明）。正常情況（有網路）永遠是這裡 fetch
+ * 到的全量資料在運作，TEMPLES 只負責「連不到伺服器時畫面不要整個空白」。
  */
 export function useTemples(): { temples: Temple[]; state: TemplesLoadState } {
   const [temples, setTemples] = useState<Temple[]>(TEMPLES);
