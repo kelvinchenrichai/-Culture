@@ -53,12 +53,13 @@ export const ShareCardModal: React.FC<ShareCardModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm overflow-y-auto">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm overflow-y-auto" role="dialog" aria-modal="true" aria-label="製作分享卡">
       <div className="bg-[#FDF9F3] w-full max-w-lg rounded-3xl p-5 md:p-6 border border-[#E8E1D5] shadow-2xl relative my-8">
         {/* Close Button */}
         <button
           onClick={onClose}
-          className="absolute right-4 top-4 p-2 rounded-full bg-white text-[#736B63] hover:text-[#2C2C2C] hover:bg-[#FAF6F0] border border-[#E8E1D5] transition-colors"
+          aria-label="關閉"
+          className="absolute right-4 top-4 p-2 rounded-full bg-white text-[#736B63] hover:text-[#2C2C2C] hover:bg-[#FAF6F0] border border-[#E8E1D5] transition-colors min-w-[40px] min-h-[40px]"
           id="btn-close-share-modal"
         >
           <X className="w-5 h-5" />

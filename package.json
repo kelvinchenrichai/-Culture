@@ -12,7 +12,9 @@
     "test": "vitest run",
     "validate:calendar": "tsx scripts/validate-calendar.ts",
     "import:temples": "tsx scripts/import-temples.ts",
-    "calendar:fetch": "tsx scripts/fetch-lunar-data.ts"
+    "calendar:fetch": "tsx scripts/fetch-lunar-data.ts",
+    "data:update:temples": "tsx scripts/import-national-temples.ts",
+    "data:validate": "tsx scripts/validate-data.ts"
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.1.14",
