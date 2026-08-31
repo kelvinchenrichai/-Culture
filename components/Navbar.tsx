@@ -22,7 +22,8 @@ export const Navbar: React.FC<NavbarProps> = ({
         {/* Brand Logo & Name */}
         <button
           onClick={onGoHome}
-          className="flex items-center space-x-2.5 text-left group focus:outline-none"
+          aria-label="回到首頁"
+          className="flex items-center space-x-2.5 text-left group focus:outline-none focus-visible:ring-2 focus-visible:ring-[#A63A28]/50 rounded-xl"
           id="btn-brand-home"
         >
           <div className="w-10 h-10 rounded-2xl bg-[#A63A28] flex items-center justify-center text-white shadow-sm shadow-[#A63A28]/25 group-hover:scale-105 transition-transform">
@@ -53,11 +54,12 @@ export const Navbar: React.FC<NavbarProps> = ({
                 ? 'bg-[#2C2C2C] text-white border-[#2C2C2C] shadow-sm'
                 : 'bg-white text-[#5C554E] border-[#E8E1D5] hover:bg-[#FDF9F3]'
             }`}
-            title="切換大字模式（長輩友善）"
+            title="切換簡易模式（長輩友善：大字、少選項、進階資料收起）"
+            aria-pressed={isElderMode}
             id="btn-toggle-elder-mode"
           >
             <Type className="w-3.5 h-3.5" />
-            <span>{isElderMode ? '大字模式 (開啟)' : '字體放大'}</span>
+            <span>{isElderMode ? '簡易模式 (開啟)' : '切換簡易模式'}</span>
           </button>
 
           {/* Quick Share Card Button */}

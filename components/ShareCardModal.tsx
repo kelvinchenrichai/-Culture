@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { ShareCardData, ShareCardStyle } from '../types';
 import { TODAY_INFO } from '../data/mockData';
 import type { TodayViewModel } from '../src/viewmodels/types';
@@ -30,14 +30,27 @@ export const ShareCardModal: React.FC<ShareCardModalProps> = ({
   isElderMode,
   today,
 }) => {
-  if (!isOpen) return null;
-
+  // Part J：hooks 一定要在任何 early return 之前呼叫，否則 isOpen 在同一個元件實例上
+  // true/false 切換時，React 呼叫的 hook 數量會不一致（違反 Rules of Hooks），實際表現
+  // 就是「分享卡開關幾次之後整個 App 噴錯」——這是這輪 accessibility/hardening 稽核時
+  // 順手抓到的既有 bug，不是新加的功能，一起修掉。
   const [activeStyle, setActiveStyle] = useState<ShareCardStyle>(
     initialData?.style || 'cultural-minimal'
   );
   const [activeTheme, setActiveTheme] = useState<'paper' | 'vermilion' | 'dark' | 'green'>('paper');
   const [copiedToast, setCopiedToast] = useState(false);
   const [customBlessing, setCustomBlessing] = useState('祝你今天事事順心，平安喜樂！');
+
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') onClose();
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, onClose]);
+
+  if (!isOpen) return null;
 
   const handleCopyText = () => {
     const text = today.state === 'success' ? `【今日好日 · 民俗生活指南】\n📅 國曆 ${today.date.solarDisplay} (${today.date.weekday}) · 農曆 ${today.date.lunarDisplay}\n🌸 宜：${today.goodActions.map(a => a.label).join('、') || '無明確記載'}\n⚠️ 忌：${today.badActions.map(a => a.label).join('、') || '無明確記載'}\n${customBlessing}\n\n資料依據：${today.source.primarySource}` : '今日資料暫時無法取得，請稍後再試。';
@@ -53,12 +66,13 @@ export const ShareCardModal: React.FC<ShareCardModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm overflow-y-auto">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm overflow-y-auto" role="dialog" aria-modal="true" aria-label="製作分享卡">
       <div className="bg-[#FDF9F3] w-full max-w-lg rounded-3xl p-5 md:p-6 border border-[#E8E1D5] shadow-2xl relative my-8">
         {/* Close Button */}
         <button
           onClick={onClose}
-          className="absolute right-4 top-4 p-2 rounded-full bg-white text-[#736B63] hover:text-[#2C2C2C] hover:bg-[#FAF6F0] border border-[#E8E1D5] transition-colors"
+          aria-label="關閉"
+          className="absolute right-4 top-4 p-2 rounded-full bg-white text-[#736B63] hover:text-[#2C2C2C] hover:bg-[#FAF6F0] border border-[#E8E1D5] transition-colors min-w-[40px] min-h-[40px]"
           id="btn-close-share-modal"
         >
           <X className="w-5 h-5" />

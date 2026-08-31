@@ -1,18 +1,13 @@
 import React, { useState } from 'react';
 import { TODAY_INFO } from './data/mockData';
-import { NavTab, BottomNav } from './components/BottomNav';
+import { NavTab, BottomNav, MORE_TAB_MEMBERS, MORE_TAB_MEMBERS_SIMPLE } from './components/BottomNav';
 import { Navbar } from './components/Navbar';
-import { TodaySummaryCard } from './components/TodaySummaryCard';
-import { ActionCard } from './components/ActionCard';
-import { DeityCard } from './components/DeityCard';
 import { EmotionCard } from './components/EmotionCard';
 import { QuickEntryGrid } from './components/QuickEntryGrid';
-import { DecisionView } from './components/DecisionView';
-import { DeitiesView } from './components/DeitiesView';
-import { DeityDetailView } from './components/DeityDetailView';
+import { SimpleHomeActions } from './components/SimpleHomeActions';
+import { MoreView } from './components/MoreView';
 import { WorshipGuideView } from './components/WorshipGuideView';
 import { FindDaysView } from './components/FindDaysView';
-import { TemplesView } from './components/TemplesView';
 import { ShareCardModal } from './components/ShareCardModal';
 import { ShareCardData } from './types';
 import { TodayRealSections } from './components/TodayRealSections';
@@ -21,17 +16,16 @@ import { RealDeitiesView } from './components/RealDeitiesView';
 import { RealTemplesView } from './components/RealTemplesView';
 import { RealDeityDetail } from './components/RealDeityDetail';
 import { useTodayViewModel } from './src/hooks/useTodayViewModel';
-import { Sparkles, Calendar, Heart, ShieldAlert, ArrowRight } from 'lucide-react';
+import { useElderMode } from './src/hooks/useElderMode';
 
 export default function App() {
   const today = useTodayViewModel();
   const [activeTab, setActiveTab] = useState<NavTab>('today');
-  const [isElderMode, setIsElderMode] = useState<boolean>(false);
+  const [isElderMode, setIsElderMode] = useElderMode(false);
   const [selectedDecisionId, setSelectedDecisionId] = useState<string>('haircut');
   const [decisionQuery, setDecisionQuery] = useState<string | undefined>();
   const [selectedDeityId, setSelectedDeityId] = useState<string | null>(null);
   const [selectedGuideId, setSelectedGuideId] = useState<string>('basic-flow');
-  const [findDaysCategory, setFindDaysCategory] = useState<string>('剪頭髮');
   const [templeSearchQuery, setTempleSearchQuery] = useState<string>('');
 
   // Share Card Modal State
@@ -85,12 +79,6 @@ export default function App() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  const handleOpenFindDays = (category: string) => {
-    setFindDaysCategory(category);
-    setActiveTab('find-days');
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
-
   const handleNavigateToTemples = (searchQuery?: string) => {
     if (searchQuery) setTempleSearchQuery(searchQuery);
     setActiveTab('temples');
@@ -120,6 +108,8 @@ export default function App() {
         return '拜拜實用教學';
       case 'temples':
         return '附近廟宇地圖';
+      case 'more':
+        return '更多功能';
       default:
         return undefined;
     }
@@ -144,16 +134,20 @@ export default function App() {
             {/* 1. Today Summary Hero Card */}
             <TodayRealSections today={today} isElderMode={isElderMode} onQuery={handleRuleQuery} onDecision={handleOpenDecision} onDeities={() => { setSelectedDeityId(null); setActiveTab('deity'); }} />
 
-            {/* 2. Big Touch Quick Entries (Section 6 requirement) */}
-            <QuickEntryGrid
-              onNavigateTab={(tab) => {
-                setSelectedDeityId(null);
-                setActiveTab(tab);
-                window.scrollTo({ top: 0, behavior: 'smooth' });
-              }}
-              onOpenDecision={handleOpenDecision}
-              isElderMode={isElderMode}
-            />
+            {/* 2. Big Touch Quick Entries — 簡易模式用 Icon First 大按鈕，一般模式維持完整列表 */}
+            {isElderMode ? (
+              <SimpleHomeActions onSelect={handleOpenDecision} />
+            ) : (
+              <QuickEntryGrid
+                onNavigateTab={(tab) => {
+                  setSelectedDeityId(null);
+                  setActiveTab(tab);
+                  window.scrollTo({ top: 0, behavior: 'smooth' });
+                }}
+                onOpenDecision={handleOpenDecision}
+                isElderMode={isElderMode}
+              />
+            )}
 
             {/* Editorial layer remains visually separate from calendar facts. */}
             <div className="relative"><EmotionCard
@@ -183,7 +177,7 @@ export default function App() {
 
         {/* VIEW 2: 生活決策速查頁 (「今天可以剪頭髮嗎？」等) */}
         {activeTab === 'decision' && (
-          <RealDecisionView selectedId={selectedDecisionId} initialQuery={decisionQuery} today={today.calendarDay} onBack={handleGoHome} />
+          <RealDecisionView selectedId={selectedDecisionId} initialQuery={decisionQuery} today={today.calendarDay} isElderMode={isElderMode} onBack={handleGoHome} />
         )}
 
         {/* VIEW 3: 今天拜什麼 & 神明百科 / 詳情頁 */}
@@ -199,11 +193,7 @@ export default function App() {
 
         {/* VIEW 4: 找好日子頁 */}
         {activeTab === 'find-days' && (
-          <FindDaysView
-            initialCategory={findDaysCategory}
-            isElderMode={isElderMode}
-            onOpenShareModal={handleOpenShareModal}
-          />
+          <FindDaysView isElderMode={isElderMode} onOpenShareModal={handleOpenShareModal} />
         )}
 
         {/* VIEW 5: 拜拜實用教學頁 */}
@@ -219,6 +209,19 @@ export default function App() {
         {/* VIEW 6: 附近寺廟地圖頁 */}
         {activeTab === 'temples' && (
           <RealTemplesView isElderMode={isElderMode} />
+        )}
+
+        {/* VIEW 7: 更多功能（沒放進底部導覽的功能入口） */}
+        {activeTab === 'more' && (
+          <MoreView
+            members={isElderMode ? MORE_TAB_MEMBERS_SIMPLE : MORE_TAB_MEMBERS}
+            isElderMode={isElderMode}
+            onNavigate={(tab) => {
+              setSelectedDeityId(null);
+              setActiveTab(tab);
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+            }}
+          />
         )}
       </main>
 

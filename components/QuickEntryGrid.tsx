@@ -57,7 +57,7 @@ export const QuickEntryGrid: React.FC<QuickEntryGridProps> = ({
       id: 'find-days',
       title: '找好日子',
       subtitle: '搬家、開工、簽約吉日',
-      badge: '尚未接真資料',
+      badge: '真實宜忌查詢',
       badgeColor: 'bg-[#A63A28]/10 text-[#A63A28] border border-[#A63A28]/20',
       icon: CalendarDays,
       iconBg: 'bg-[#A63A28]/10 text-[#A63A28]',
@@ -67,7 +67,7 @@ export const QuickEntryGrid: React.FC<QuickEntryGridProps> = ({
       id: 'temples',
       title: '附近有什麼廟？',
       subtitle: '指標宮廟與香火導航',
-      badge: '5 間真實樣本',
+      badge: '全台寺廟真實資料',
       badgeColor: 'bg-[#EBF3FB] text-[#2A5C8A] border border-[#2A5C8A]/20',
       icon: MapPin,
       iconBg: 'bg-[#EBF3FB] text-[#2A5C8A]',
@@ -103,7 +103,7 @@ export const QuickEntryGrid: React.FC<QuickEntryGridProps> = ({
             <button
               key={item.id}
               onClick={item.action}
-              className="w-full text-left p-4 rounded-xl bg-white border border-[#E8E1D5] hover:border-[#A63A28]/50 hover:bg-[#FDF6F4] transition-all group flex items-center justify-between focus:outline-none"
+              className="w-full text-left p-4 rounded-xl bg-white border border-[#E8E1D5] hover:border-[#A63A28]/50 hover:bg-[#FDF6F4] transition-all group flex items-center justify-between focus:outline-none focus-visible:ring-2 focus-visible:ring-[#A63A28]/50"
               id={`quick-action-${item.id}`}
             >
               <div className="flex items-center space-x-3">
