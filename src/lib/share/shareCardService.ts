@@ -1,4 +1,5 @@
 import type { CalendarDay } from '../calendar/types';
+import { renderMotif, type IllustrationMotif } from './illustrations';
 const escapeXml = (value: string) => value.replace(/[<>&'\"]/g, c => ({ '<': '&lt;', '>': '&gt;', '&': '&amp;', "'": '&apos;', '"': '&quot;' }[c]!));
 export class ShareCardService {
   createSvg(day: CalendarDay, brand = '今日好日'): string {
@@ -35,6 +36,8 @@ export interface GenericCardContent {
   lines: string[];
   quote?: string;
   footer: string;
+  /** 自製向量插畫裝飾（山水/蓮花/祥雲/廟宇剪影），見 illustrations.ts 為何不用照片。 */
+  motif?: IllustrationMotif;
 }
 
 /**
@@ -64,11 +67,38 @@ function wrapText(value: string, maxCharsPerLine: number): string[] {
   return rows;
 }
 
+/**
+ * Part（下載圖卡稽核時發現的既有 bug）：標題原本是單行 `<text>`，完全沒有斷行——像
+ * 「生活決策卡」樣式的標題其實是 `primaryText.split('！')[0]`，只要呼叫端傳進來的
+ * primaryText 不含「！」（例如一整段神明介紹文字），split 結果就是整段長文字，會直接
+ * 從卡片右邊界一路溢出到畫面外，下載出來的圖卡會被切成看不完整的一行。這裡跟 lines/quote
+ * 用同一套 wrapText 斷行，並限制最多 3 行、超過的部分用「…」收尾，避免標題把整張卡撐爆。
+ */
+const TITLE_MAX_LINES = 3;
+function wrapTitle(title: string, maxCharsPerLine: number): string[] {
+  const rows = wrapText(title, maxCharsPerLine);
+  if (rows.length <= TITLE_MAX_LINES) return rows;
+  const truncated = rows.slice(0, TITLE_MAX_LINES);
+  truncated[TITLE_MAX_LINES - 1] = `${truncated[TITLE_MAX_LINES - 1].replace(/[、。，]$/, '')}…`;
+  return truncated;
+}
+
 export function createGenericShareCardSvg(content: GenericCardContent, theme: GenericCardTheme): string {
   const width = 1080;
   const height = 1350;
+  const titleRows = wrapTitle(content.title, 13);
+  const titleLineHeight = 76;
+  let titleY = 320;
+  const titleSvgs = titleRows
+    .map((line) => {
+      const svg = `<text x="90" y="${titleY}" font-size="64" fill="${theme.text}" font-family="'Noto Serif TC', serif" font-weight="900">${escapeXml(line)}</text>`;
+      titleY += titleLineHeight;
+      return svg;
+    })
+    .join('');
+  const dividerY = titleY - titleLineHeight + 60;
   const lineRows = content.lines.flatMap((line) => wrapText(line, 20));
-  let y = 560;
+  let y = dividerY + 180;
   const lineSvgs = lineRows
     .map((line) => {
       const svg = `<text x="90" y="${y}" font-size="40" fill="${theme.text}" font-family="'Noto Serif TC', serif">${escapeXml(line)}</text>`;
@@ -87,12 +117,16 @@ export function createGenericShareCardSvg(content: GenericCardContent, theme: Ge
     .join('');
 
   return `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">
+    <defs>
+      <clipPath id="cardClip"><rect x="50" y="50" width="${width - 100}" height="${height - 100}" rx="36"/></clipPath>
+    </defs>
     <rect width="${width}" height="${height}" fill="${theme.bg}"/>
+    ${content.motif ? `<g clip-path="url(#cardClip)">${renderMotif(content.motif, theme.accent)}</g>` : ''}
     <rect x="50" y="50" width="${width - 100}" height="${height - 100}" rx="36" fill="none" stroke="${theme.border}" stroke-width="4"/>
     <text x="${width - 130}" y="200" text-anchor="middle" font-size="140" fill="${theme.accent}" opacity="0.12" font-family="'Noto Serif TC', serif">吉</text>
     <text x="90" y="220" font-size="34" fill="${theme.accent}" font-family="'Noto Sans TC', sans-serif" font-weight="700">${escapeXml(content.eyebrow)}</text>
-    <text x="90" y="320" font-size="64" fill="${theme.text}" font-family="'Noto Serif TC', serif" font-weight="900">${escapeXml(content.title)}</text>
-    <line x1="90" y1="380" x2="${width - 90}" y2="380" stroke="${theme.border}" stroke-width="3"/>
+    ${titleSvgs}
+    <line x1="90" y1="${dividerY}" x2="${width - 90}" y2="${dividerY}" stroke="${theme.border}" stroke-width="3"/>
     ${lineSvgs}
     ${quoteSvgs}
     <line x1="90" y1="${height - 150}" x2="${width - 90}" y2="${height - 150}" stroke="${theme.border}" stroke-width="3"/>
