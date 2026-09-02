@@ -2,6 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { ShareCardData, ShareCardStyle } from '../types';
 import { TODAY_INFO } from '../data/mockData';
 import type { TodayViewModel } from '../src/viewmodels/types';
+import { shareToLine } from '../src/lib/share/lineShare';
+import { createGenericShareCardSvg, CARD_THEMES, type GenericCardContent } from '../src/lib/share/shareCardService';
 import {
   X,
   Share2,
@@ -39,6 +41,7 @@ export const ShareCardModal: React.FC<ShareCardModalProps> = ({
   );
   const [activeTheme, setActiveTheme] = useState<'paper' | 'vermilion' | 'dark' | 'green'>('paper');
   const [copiedToast, setCopiedToast] = useState(false);
+  const [downloadState, setDownloadState] = useState<'idle' | 'working' | 'done'>('idle');
   const [customBlessing, setCustomBlessing] = useState('祝你今天事事順心，平安喜樂！');
 
   useEffect(() => {
@@ -52,17 +55,127 @@ export const ShareCardModal: React.FC<ShareCardModalProps> = ({
 
   if (!isOpen) return null;
 
+  // Part（bug fix round）：這裡原本不管使用者是從哪裡點「分享」進來的，一律只組「今天」的宜忌
+  // 文字——結果從「找好日子」點某一個未來日期分享時，文字卡跟圖卡顯示的其實是今天的資料，
+  // 不是使用者真正想分享的那一天。改成：有 initialData（代表呼叫方指定了明確內容，例如某個
+  // 未來好日子、某位神明、某個決策結果）就一定用 initialData，沒有的時候才退回顯示「今天」。
+  const buildShareText = (): string => {
+    if (initialData) {
+      const parts = [initialData.title, initialData.subtitle, initialData.primaryText, initialData.secondaryText, customBlessing].filter(
+        (part): part is string => Boolean(part && part.trim())
+      );
+      return `【今日好日】${parts.join('\n')}`;
+    }
+    return today.state === 'success'
+      ? `【今日好日 · 民俗生活指南】\n📅 國曆 ${today.date.solarDisplay} (${today.date.weekday}) · 農曆 ${today.date.lunarDisplay}\n🌸 宜：${today.goodActions.map(a => a.label).join('、') || '無明確記載'}\n⚠️ 忌：${today.badActions.map(a => a.label).join('、') || '無明確記載'}\n${customBlessing}\n\n資料依據：${today.source.primarySource}`
+      : '今日資料暫時無法取得，請稍後再試。';
+  };
+
   const handleCopyText = () => {
-    const text = today.state === 'success' ? `【今日好日 · 民俗生活指南】\n📅 國曆 ${today.date.solarDisplay} (${today.date.weekday}) · 農曆 ${today.date.lunarDisplay}\n🌸 宜：${today.goodActions.map(a => a.label).join('、') || '無明確記載'}\n⚠️ 忌：${today.badActions.map(a => a.label).join('、') || '無明確記載'}\n${customBlessing}\n\n資料依據：${today.source.primarySource}` : '今日資料暫時無法取得，請稍後再試。';
-    navigator.clipboard?.writeText?.(text);
+    navigator.clipboard?.writeText?.(buildShareText());
     setCopiedToast(true);
     setTimeout(() => setCopiedToast(false), 2500);
   };
 
   const handleShareLine = () => {
-    const text = `【今日好日】${today.date.solarDisplay} · 農曆${today.date.lunarDisplay}\n${customBlessing}`;
-    const url = `https://line.me/R/msg/text/?${encodeURIComponent(text)}`;
-    window.open(url, '_blank');
+    // Part（bug fix round）：原本分享出去的訊息完全沒有附網站連結，朋友收到後沒辦法點回來看——
+    // 對「容易在 LINE 裡面分享推廣」這個目標來說等於少了最後一步。shareToLine 統一補上網址。
+    shareToLine(buildShareText());
+  };
+
+  // Part（bug fix round）：畫面上原本只有一個「即時預覽」的 div，完全沒有存成圖片的功能——
+  // 已經寫好且有測試的 SVG 產生器從來沒被接上任何畫面。這裡把目前畫面上顯示的內容，轉成
+  // 一張可以下載、適合長輩直接在 LINE 裡面用「傳照片」方式轉傳的直式圖卡（PNG）。
+  const buildGenericCardContent = (): GenericCardContent => {
+    if (activeStyle === 'cultural-minimal') {
+      if (initialData) {
+        return {
+          eyebrow: initialData.subtitle || '好日子分享',
+          title: initialData.title || '今日好日',
+          lines: [initialData.primaryText, initialData.secondaryText].filter((v): v is string => Boolean(v)),
+          quote: customBlessing,
+          footer: '今日好日 · 台灣民俗生活指南',
+        };
+      }
+      return {
+        eyebrow: `${today.date.solarDisplay} · ${today.date.weekday}`,
+        title: `農曆 ${today.date.lunarDisplay}`,
+        lines: [
+          `宜：${today.goodActions.map((a) => a.label).join('、') || '無明確記載'}`,
+          `忌：${today.badActions.map((a) => a.label).join('、') || '無明確記載'}`,
+        ],
+        quote: TODAY_INFO.emotionalQuote.content,
+        footer: '今日好日 · 台灣民俗生活指南',
+      };
+    }
+    if (activeStyle === 'daily-quote') {
+      return {
+        eyebrow: '今日好日 · 日曆手撕箋',
+        title: today.date.solarDisplay,
+        lines: [`農曆 ${today.date.lunarDisplay}`, TODAY_INFO.emotionalQuote.subtext].filter(Boolean),
+        quote: `${TODAY_INFO.emotionalQuote.content}／${customBlessing}`,
+        footer: '今日好日 · 台灣民俗生活指南',
+      };
+    }
+    if (activeStyle === 'deity-blessing') {
+      return {
+        eyebrow: initialData?.title || '福德正神（土地公）· 慈悲護佑',
+        title: initialData?.primaryText || '保佑闔家安康、出入平安、財運亨通',
+        lines: [initialData?.secondaryText || '農曆初二、十六作牙吉日。心誠則靈，常念善心，平安自來。'],
+        quote: customBlessing,
+        footer: '今日好日 · 敬神祈福指南',
+      };
+    }
+    return {
+      eyebrow: initialData?.title || '今天可以剪頭髮嗎？',
+      title: initialData?.primaryText ? initialData.primaryText.split('！')[0] : '適合！大吉',
+      lines: [initialData?.subtitle || '剪去雜緒，煥然一新，旺氣提升！'],
+      quote: customBlessing,
+      footer: `${today.date.solarDisplay} · 今日好日生活指南`,
+    };
+  };
+
+  const handleDownloadImage = () => {
+    setDownloadState('working');
+    const theme = CARD_THEMES[activeTheme];
+    const svg = createGenericShareCardSvg(buildGenericCardContent(), theme);
+    const svgBlob = new Blob([svg], { type: 'image/svg+xml;charset=utf-8' });
+    const svgUrl = URL.createObjectURL(svgBlob);
+    const img = new Image();
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      canvas.width = 1080;
+      canvas.height = 1350;
+      const ctx = canvas.getContext('2d');
+      if (!ctx) {
+        setDownloadState('idle');
+        URL.revokeObjectURL(svgUrl);
+        return;
+      }
+      ctx.drawImage(img, 0, 0);
+      canvas.toBlob((blob) => {
+        URL.revokeObjectURL(svgUrl);
+        if (!blob) {
+          setDownloadState('idle');
+          return;
+        }
+        const pngUrl = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = pngUrl;
+        link.download = `今日好日-分享卡-${Date.now()}.png`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(pngUrl);
+        setDownloadState('done');
+        setTimeout(() => setDownloadState('idle'), 2500);
+      }, 'image/png');
+    };
+    img.onerror = () => {
+      setDownloadState('idle');
+      URL.revokeObjectURL(svgUrl);
+    };
+    img.src = svgUrl;
   };
 
   return (
@@ -161,10 +274,10 @@ export const ShareCardModal: React.FC<ShareCardModalProps> = ({
               <div className="flex items-center justify-between border-b border-current/15 pb-3">
                 <div>
                   <div className="text-xs opacity-70">
-                    {today.date.solarDisplay} · {today.date.weekday}
+                    {initialData?.dateText ?? `${today.date.solarDisplay} · ${today.date.weekday}`}
                   </div>
                   <div className="font-serif-tc font-bold text-lg text-[#A63A28]">
-                    農曆 {today.date.lunarDisplay}
+                    {initialData?.title ?? `農曆 ${today.date.lunarDisplay}`}
                   </div>
                 </div>
                 <div className="seal-stamp-filled text-xs px-2.5 py-1">
@@ -172,25 +285,40 @@ export const ShareCardModal: React.FC<ShareCardModalProps> = ({
                 </div>
               </div>
 
-              <div className="space-y-2">
-                <div className="flex items-start space-x-2">
-                  <span className="w-5 h-5 rounded bg-[#EBF5ED] text-[#2E7D32] flex items-center justify-center font-bold text-xs shrink-0">
-                    宜
-                  </span>
-                  <span className="text-xs font-semibold leading-relaxed">
-                    {today.goodActions.map((a) => a.label).join(' · ') || '無明確記載'}
-                  </span>
+              {/* Part（bug fix round）：這裡以前不管有沒有 initialData 一律顯示「今天」的宜忌，
+                  導致「找好日子」分享某個未來日期時，卡片內容其實是今天的、不是那一天的。
+                  現在有 initialData（呼叫方指定明確內容）就優先顯示它。 */}
+              {initialData ? (
+                <div className="space-y-2">
+                  {initialData.subtitle && (
+                    <p className="text-xs font-semibold opacity-80">{initialData.subtitle}</p>
+                  )}
+                  <p className="text-sm font-semibold leading-relaxed">{initialData.primaryText}</p>
+                  {initialData.secondaryText && (
+                    <p className="text-xs opacity-80 leading-relaxed">{initialData.secondaryText}</p>
+                  )}
                 </div>
+              ) : (
+                <div className="space-y-2">
+                  <div className="flex items-start space-x-2">
+                    <span className="w-5 h-5 rounded bg-[#EBF5ED] text-[#2E7D32] flex items-center justify-center font-bold text-xs shrink-0">
+                      宜
+                    </span>
+                    <span className="text-xs font-semibold leading-relaxed">
+                      {today.goodActions.map((a) => a.label).join(' · ') || '無明確記載'}
+                    </span>
+                  </div>
 
-                <div className="flex items-start space-x-2">
-                  <span className="w-5 h-5 rounded bg-[#A63A28]/10 text-[#A63A28] flex items-center justify-center font-bold text-xs shrink-0">
-                    忌
-                  </span>
-                  <span className="text-xs opacity-80 leading-relaxed">
-                    {today.badActions.map((a) => a.label).join(' · ') || '無明確記載'}
-                  </span>
+                  <div className="flex items-start space-x-2">
+                    <span className="w-5 h-5 rounded bg-[#A63A28]/10 text-[#A63A28] flex items-center justify-center font-bold text-xs shrink-0">
+                      忌
+                    </span>
+                    <span className="text-xs opacity-80 leading-relaxed">
+                      {today.badActions.map((a) => a.label).join(' · ') || '無明確記載'}
+                    </span>
+                  </div>
                 </div>
-              </div>
+              )}
 
               <div className="pt-3 border-t border-current/15 text-xs italic font-serif-tc opacity-90">
                 {TODAY_INFO.emotionalQuote.content}
@@ -295,7 +423,21 @@ export const ShareCardModal: React.FC<ShareCardModalProps> = ({
         </div>
 
         {/* Action Buttons */}
-        <div className="flex flex-col sm:flex-row items-center gap-2.5 mt-5 pt-3 border-t border-[#E8E1D5]">
+        <div className="flex flex-col sm:flex-row items-center gap-2.5 mt-3">
+          <button
+            onClick={handleDownloadImage}
+            disabled={downloadState === 'working'}
+            className="w-full py-3 px-4 rounded-xl bg-[#A63A28] text-white hover:bg-[#8f3121] font-semibold text-xs transition-all flex items-center justify-center space-x-1.5 shadow-sm disabled:opacity-60"
+            id="btn-download-card-image"
+          >
+            {downloadState === 'done' ? <Check className="w-4 h-4 text-[#FFE58F]" /> : <Download className="w-4 h-4" />}
+            <span>
+              {downloadState === 'working' ? '圖片產生中…' : downloadState === 'done' ? '已下載，可以直接傳圖片給朋友！' : '下載圖卡（存成照片，長輩最愛用這個轉傳）'}
+            </span>
+          </button>
+        </div>
+
+        <div className="flex flex-col sm:flex-row items-center gap-2.5 mt-2.5 pt-3 border-t border-[#E8E1D5]">
           <button
             onClick={handleShareLine}
             className="w-full sm:w-1/2 py-3 px-4 rounded-xl bg-[#06C755] text-white hover:bg-[#05B34C] font-semibold text-xs transition-all flex items-center justify-center space-x-1.5 shadow-sm"

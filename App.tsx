@@ -177,14 +177,14 @@ export default function App() {
 
         {/* VIEW 2: 生活決策速查頁 (「今天可以剪頭髮嗎？」等) */}
         {activeTab === 'decision' && (
-          <RealDecisionView selectedId={selectedDecisionId} initialQuery={decisionQuery} today={today.calendarDay} isElderMode={isElderMode} onBack={handleGoHome} />
+          <RealDecisionView selectedId={selectedDecisionId} initialQuery={decisionQuery} today={today.calendarDay} isElderMode={isElderMode} onBack={handleGoHome} onOpenShareModal={handleOpenShareModal} />
         )}
 
         {/* VIEW 3: 今天拜什麼 & 神明百科 / 詳情頁 */}
         {activeTab === 'deity' && (
           <div>
             {selectedDeityId ? (
-              <RealDeityDetail deityId={selectedDeityId} onBack={() => setSelectedDeityId(null)} onTemples={handleNavigateToTemples} />
+              <RealDeityDetail deityId={selectedDeityId} onBack={() => setSelectedDeityId(null)} onTemples={handleNavigateToTemples} onOpenShareModal={handleOpenShareModal} />
             ) : (
               <RealDeitiesView today={today} onSelect={(deityId) => setSelectedDeityId(deityId)} />
             )}
