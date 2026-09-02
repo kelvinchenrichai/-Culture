@@ -47,13 +47,20 @@ const STATUS_TONE: Record<DecisionViewModel['status'], { text: string; bg: strin
 };
 
 export function RealDecisionView({ selectedId, initialQuery, today, isElderMode, onBack, onOpenShareModal }: { selectedId: string; initialQuery?: string; today?: CalendarDay; isElderMode?: boolean; onBack: () => void; onOpenShareModal?: (data: Partial<ShareCardData>) => void }) {
-  const selected = choices.find((item) => item.id === selectedId) ?? choices[0];
-  const [query, setQuery] = useState(initialQuery ?? selected.query);
+  const initialSelected = choices.find((item) => item.id === selectedId) ?? choices[0];
+  const [query, setQuery] = useState(initialQuery ?? initialSelected.query);
   const [result, setResult] = useState<DecisionViewModel>();
   const [day, setDay] = useState<CalendarDay | null>(null);
   const [unsupported, setUnsupported] = useState(false);
   const [showWhy, setShowWhy] = useState(false);
   const [showAlmanac, setShowAlmanac] = useState(false);
+  // Part（bug fix round）：以前這個畫面標題「今天XX」跟按鈕反白狀態，是直接讀 selectedId
+  // 這個 prop——但那個 prop 只有從首頁的快速按鈕進來時才會變，點畫面裡的分類切換按鈕
+  // （剪頭髮/拜拜/搬家…）完全不會更新它。結果就是使用者回報的狀況：點「開工」，結果內容
+  // （icon、忌宜判斷）都正確換成開工的，但標題卡在「今天剪頭髮」沒有跟著換。
+  // 改成單一事實來源：selected 永遠等於「最後一次成功解析出結果的那個分類」，不論是點分類
+  // 按鈕、從首頁進來、還是自己輸入文字查詢，都經過同一個 run() 函式去更新它，就不會再兜不起來。
+  const [selected, setSelected] = useState(initialSelected);
 
   const run = async (text: string) => {
     const parsed = parseQuery(text, { baseDate: today?.date });
@@ -63,6 +70,8 @@ export function RealDecisionView({ selectedId, initialQuery, today, isElderMode,
       setDay(null);
       return;
     }
+    const matchedChoice = choices.find((c) => c.intent === parsed.intent);
+    if (matchedChoice) setSelected(matchedChoice);
     setUnsupported(false);
     setShowWhy(false);
     setShowAlmanac(false);
@@ -72,7 +81,7 @@ export function RealDecisionView({ selectedId, initialQuery, today, isElderMode,
   };
 
   useEffect(() => {
-    const text = initialQuery ?? selected.query;
+    const text = initialQuery ?? initialSelected.query;
     setQuery(text);
     void run(text);
     // eslint-disable-next-line react-hooks/exhaustive-deps
