@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
-import { Compass, MapPin, Navigation, Search, ChevronDown, LocateFixed, ShieldAlert } from 'lucide-react';
+import { Compass, MapPin, Navigation, Search, ChevronDown, LocateFixed, ShieldAlert, Share2 } from 'lucide-react';
 import { useTemples } from '../src/hooks/useTemples';
 import { findNearbyTemplesWithExpansion } from '../src/lib/temples/templeService';
 import { formatDistance, buildNavigationUrl } from '../src/lib/temples/format';
 import type { NearbyTemple } from '../src/lib/temples/types';
+import { shareToLine } from '../src/lib/share/lineShare';
 
 type LocateState = 'permission' | 'loading' | 'ready' | 'denied' | 'unsupported' | 'error';
 
@@ -146,6 +147,16 @@ function TempleCard({ temple, isElderMode }: { temple: NearbyTemple; isElderMode
           className="px-4 py-3 rounded-xl bg-white border border-[#E8E1D5] text-[#5C554E] font-semibold min-h-[48px] flex items-center gap-1"
         >
           看詳細 <ChevronDown className={`w-4 h-4 transition-transform ${showDetail ? 'rotate-180' : ''}`} />
+        </button>
+        <button
+          onClick={() =>
+            shareToLine(`【推薦廟宇】${temple.name}\n主祀：${temple.rawMainDeity ?? '未提供'}\n地址：${temple.rawAddress}\n導航：${buildNavigationUrl(temple)}`)
+          }
+          aria-label={`分享${temple.name}給朋友`}
+          className="px-4 py-3 rounded-xl bg-white border border-[#E8E1D5] text-[#5C554E] font-semibold min-h-[48px] flex items-center gap-1"
+          id={`btn-share-temple-${temple.id}`}
+        >
+          <Share2 className="w-4 h-4" />
         </button>
       </div>
       {showDetail && (

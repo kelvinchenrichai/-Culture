@@ -12,6 +12,7 @@ import {
   Plane,
   Search,
   ShieldAlert,
+  Share2,
   XCircle,
 } from 'lucide-react';
 import type { CalendarDay } from '../src/lib/calendar/types';
@@ -20,6 +21,7 @@ import { parseQuery } from '../src/lib/rules/queryParser';
 import { calendarService } from '../src/services/appServices';
 import { toDecisionViewModel } from '../src/viewmodels/decisionViewModel';
 import type { DecisionViewModel } from '../src/viewmodels/types';
+import type { ShareCardData } from '../types';
 
 const choices: { id: string; label: string; query: string; intent: Intent; icon: React.ComponentType<{ className?: string }> }[] = [
   { id: 'haircut', label: '剪頭髮', query: '今天可以剪頭髮嗎？', intent: 'HAIRCUT', icon: Scissors },
@@ -44,7 +46,7 @@ const STATUS_TONE: Record<DecisionViewModel['status'], { text: string; bg: strin
   unknown: { text: 'text-[#5C554E]', bg: 'bg-[#F2EFE9]', Icon: HelpCircle },
 };
 
-export function RealDecisionView({ selectedId, initialQuery, today, isElderMode, onBack }: { selectedId: string; initialQuery?: string; today?: CalendarDay; isElderMode?: boolean; onBack: () => void }) {
+export function RealDecisionView({ selectedId, initialQuery, today, isElderMode, onBack, onOpenShareModal }: { selectedId: string; initialQuery?: string; today?: CalendarDay; isElderMode?: boolean; onBack: () => void; onOpenShareModal?: (data: Partial<ShareCardData>) => void }) {
   const selected = choices.find((item) => item.id === selectedId) ?? choices[0];
   const [query, setQuery] = useState(initialQuery ?? selected.query);
   const [result, setResult] = useState<DecisionViewModel>();
@@ -159,6 +161,24 @@ export function RealDecisionView({ selectedId, initialQuery, today, isElderMode,
               <p className={`text-[#5C554E] ${isElderMode ? 'text-xl' : 'text-lg'}`}>今天{selected.label}</p>
               <p className={`font-serif-tc font-bold ${tone.text} ${isElderMode ? 'text-4xl' : 'text-3xl'}`}>{STATUS_LABEL[result.status]}</p>
               <p className={`text-[#2C2C2C] ${isElderMode ? 'text-xl' : 'text-lg'}`}>{result.explanation}</p>
+              {onOpenShareModal && (
+                <button
+                  onClick={() =>
+                    onOpenShareModal({
+                      title: `今天${selected.label}`,
+                      subtitle: result.explanation,
+                      primaryText: `${STATUS_LABEL[result.status]}！`,
+                      secondaryText: result.explanation,
+                      categoryName: selected.label,
+                      style: 'decision-ticket',
+                    })
+                  }
+                  className="mt-1 flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#A63A28]/10 text-[#A63A28] border border-[#A63A28]/20 hover:bg-[#A63A28]/15 text-xs font-semibold"
+                  id="btn-share-decision"
+                >
+                  <Share2 className="w-3.5 h-3.5" /><span>分享這個結果給親友</span>
+                </button>
+              )}
             </div>
 
             {/* A4：「為什麼？」折疊 — 詳細來源與驗證資訊放進去，結果優先、資料其次 */}
