@@ -186,7 +186,7 @@ export default function App() {
             {selectedDeityId ? (
               <RealDeityDetail deityId={selectedDeityId} onBack={() => setSelectedDeityId(null)} onTemples={handleNavigateToTemples} onOpenShareModal={handleOpenShareModal} />
             ) : (
-              <RealDeitiesView today={today} onSelect={(deityId) => setSelectedDeityId(deityId)} />
+              <RealDeitiesView today={today} onSelect={(deityId) => setSelectedDeityId(deityId)} onOpenShareModal={handleOpenShareModal} />
             )}
           </div>
         )}

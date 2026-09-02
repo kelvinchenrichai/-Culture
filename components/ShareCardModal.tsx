@@ -4,6 +4,14 @@ import { TODAY_INFO } from '../data/mockData';
 import type { TodayViewModel } from '../src/viewmodels/types';
 import { shareToLine } from '../src/lib/share/lineShare';
 import { createGenericShareCardSvg, CARD_THEMES, type GenericCardContent } from '../src/lib/share/shareCardService';
+import { renderMotif, type IllustrationMotif } from '../src/lib/share/illustrations';
+
+const STYLE_MOTIF: Record<ShareCardStyle, IllustrationMotif> = {
+  'cultural-minimal': 'mountainWater',
+  'daily-quote': 'cloud',
+  'deity-blessing': 'lotus',
+  'decision-ticket': 'cloud',
+};
 import {
   X,
   Share2,
@@ -53,6 +61,18 @@ export const ShareCardModal: React.FC<ShareCardModalProps> = ({
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [isOpen, onClose]);
 
+  // Part（「小節日」擴充時發現的既有 bug）：這個 modal 從頭到尾只掛載一次（isOpen 只是控制
+  // 要不要 return null，不是控制 mount/unmount），所以上面 activeStyle 的 useState 初始值
+  // 只會在「第一次」render 時讀一次 initialData.style——App 第一次開啟分享卡時 initialData
+  // 通常還是 undefined，之後不管從哪個按鈕帶著哪個 style 進來（例如神明頁的
+  // 'deity-blessing'、決策頁的 'decision-ticket'），分頁永遠停在上次手動選過的樣式（或永遠
+  // 卡在預設的「今日宜忌卡」），呼叫端指定的 style 完全被忽略。用 useEffect 在每次「真的打開
+  // 且帶著新 initialData」時重新同步，才會符合使用者從哪裡點分享、預設就看到對應樣式的預期。
+  useEffect(() => {
+    if (isOpen) setActiveStyle(initialData?.style || 'cultural-minimal');
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOpen, initialData]);
+
   if (!isOpen) return null;
 
   // Part（bug fix round）：這裡原本不管使用者是從哪裡點「分享」進來的，一律只組「今天」的宜忌
@@ -95,6 +115,7 @@ export const ShareCardModal: React.FC<ShareCardModalProps> = ({
           lines: [initialData.primaryText, initialData.secondaryText].filter((v): v is string => Boolean(v)),
           quote: customBlessing,
           footer: '今日好日 · 台灣民俗生活指南',
+          motif: 'mountainWater',
         };
       }
       return {
@@ -106,6 +127,7 @@ export const ShareCardModal: React.FC<ShareCardModalProps> = ({
         ],
         quote: TODAY_INFO.emotionalQuote.content,
         footer: '今日好日 · 台灣民俗生活指南',
+        motif: 'mountainWater',
       };
     }
     if (activeStyle === 'daily-quote') {
@@ -115,6 +137,7 @@ export const ShareCardModal: React.FC<ShareCardModalProps> = ({
         lines: [`農曆 ${today.date.lunarDisplay}`, TODAY_INFO.emotionalQuote.subtext].filter(Boolean),
         quote: `${TODAY_INFO.emotionalQuote.content}／${customBlessing}`,
         footer: '今日好日 · 台灣民俗生活指南',
+        motif: 'cloud',
       };
     }
     if (activeStyle === 'deity-blessing') {
@@ -124,6 +147,7 @@ export const ShareCardModal: React.FC<ShareCardModalProps> = ({
         lines: [initialData?.secondaryText || '農曆初二、十六作牙吉日。心誠則靈，常念善心，平安自來。'],
         quote: customBlessing,
         footer: '今日好日 · 敬神祈福指南',
+        motif: 'lotus',
       };
     }
     return {
@@ -132,6 +156,7 @@ export const ShareCardModal: React.FC<ShareCardModalProps> = ({
       lines: [initialData?.subtitle || '剪去雜緒，煥然一新，旺氣提升！'],
       quote: customBlessing,
       footer: `${today.date.solarDisplay} · 今日好日生活指南`,
+      motif: 'cloud',
     };
   };
 
@@ -263,6 +288,15 @@ export const ShareCardModal: React.FC<ShareCardModalProps> = ({
               : 'bg-[#F2F7F3] text-[#2C2C2C] border-[#CDE3D1]'
           }`}
         >
+          {/* Part（分享卡插畫）：跟下載出來的 PNG 用同一個 renderMotif，避免預覽看到的跟下載到的長得不一樣。 */}
+          <svg
+            className="absolute inset-0 w-full h-full pointer-events-none select-none -z-10"
+            viewBox="0 0 1080 1350"
+            preserveAspectRatio="xMidYMid slice"
+            aria-hidden="true"
+            dangerouslySetInnerHTML={{ __html: renderMotif(STYLE_MOTIF[activeStyle], CARD_THEMES[activeTheme].accent) }}
+          />
+
           {/* Subtle Watermark seal */}
           <div className="absolute right-3 top-3 opacity-15 pointer-events-none select-none">
             <span className="font-serif-tc font-bold text-5xl">吉</span>
